@@ -1,0 +1,12 @@
+# 皮肤描述文件：声明每种键盘在不同设备 / 方向下使用哪个配置文件。
+# 文件名不含 .yaml 后缀；实际加载 light/<名称>.yaml 或 dark/<名称>.yaml。
+pinyin:
+  iPhone:
+    portrait: pinyinPortrait
+    landscape: pinyinPortrait
+  iPad:
+    portrait: pinyinPortrait
+    landscape: pinyinPortrait
+    floating: pinyinPortrait
+
+# 未声明 numeric 时使用内置数字键盘；未声明 symbolic 时使用内置符号键盘。

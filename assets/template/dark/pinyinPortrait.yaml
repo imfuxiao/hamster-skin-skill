@@ -1,0 +1,417 @@
+# =============================================================================
+# 元书输入法皮肤模板 —— iPhone 竖屏 26 键拼音键盘（暗色）
+#
+# 改配色：只改下面「调色板」中的值即可整体换肤。
+# 改布局：改 keyboardLayout（HStack = 行，Cell = 键）。
+# 校验：  ruby scripts/validate_skin.rb <皮肤目录>
+# =============================================================================
+
+# ---- 调色板（这是一个惰性根节点，不会被引用，仅用于集中定义 YAML 锚点）----
+_palette:
+  keyboardBg:   &cKeyboardBg   "#2C2C2E"   # 键盘底色
+  letterBg:     &cLetterBg     "#6C6C70"   # 字母键底色
+  letterBgDown: &cLetterBgDown "#4A4A4E"   # 字母键按下底色
+  systemBg:     &cSystemBg     "#48484A"   # 功能键底色
+  systemBgDown: &cSystemBgDown "#6C6C70"   # 功能键按下底色
+  accentBg:     &cAccentBg     "#0A84FF"   # 强调键（回车）底色
+  edge:         &cEdge         "#1C1C1E"   # 按键下边缘阴影色
+  text:         &cText         "#FFFFFF"   # 主文字色
+  textOnAccent: &cTextOnAccent "#FFFFFF"   # 强调键上的文字色
+  candidate:    &cCandidate    "#FFFFFF"   # 候选字颜色
+  comment:      &cComment      "#AEAEB2"   # 候选字注释颜色
+
+# ---- 三个区域的高度（必填）----
+preeditHeight: 25
+toolbarHeight: 40
+keyboardHeight: 216
+
+# ---- 预编辑区 ----
+preeditStyle:
+  backgroundStyle: keyboardBackgroundStyle
+  foregroundStyle: preeditForegroundStyle
+  insets: { top: 2, left: 6 }
+preeditForegroundStyle:
+  fontSize: 14
+  textColor: *cText
+
+# ---- 工具栏区（非输入态显示；输入态会被候选栏覆盖）----
+toolbarStyle:
+  backgroundStyle: keyboardBackgroundStyle
+toolbarLayout: {}
+
+# ---- 横向候选栏（输入态覆盖工具栏区）----
+horizontalCandidatesStyle:
+  backgroundStyle: keyboardBackgroundStyle
+  insets: { top: 4, left: 4, bottom: 2 }
+horizontalCandidatesLayout:
+  - HStack:
+      subviews:
+        - Cell: horizontalCandidatesCell
+        - Cell: expandButton
+horizontalCandidatesCell:
+  type: horizontalCandidates
+  candidateStyle: candidateCellStyle
+  maxColumns: 7
+expandButton:
+  size: { width: 44 }
+  action: { shortcut: "#candidatesBarStateToggle" }
+  foregroundStyle: expandButtonForegroundStyle
+expandButtonForegroundStyle:
+  buttonStyleType: systemImage
+  systemImageName: chevron.down
+  fontSize: 14
+  normalColor: *cText
+  highlightColor: *cText
+
+# ---- 纵向候选栏（展开态，覆盖预编辑区以下全部区域）----
+verticalCandidatesStyle:
+  backgroundStyle: keyboardBackgroundStyle
+  insets: { top: 4, left: 4, right: 4 }
+verticalCandidatesLayout:
+  - HStack:
+      subviews:
+        - Cell: verticalCandidatesCell
+verticalCandidatesCell:
+  type: verticalCandidates
+  candidateStyle: candidateCellStyle
+  maxRows: 4
+  maxColumns: 5
+  separatorColor: "#48484A"
+
+# ---- 候选字单元格样式（横向 / 纵向共用）----
+candidateCellStyle:
+  insets: { top: 2, left: 6, bottom: 2, right: 6 }
+  textFontSize: 18
+  commentFontSize: 12
+  indexFontSize: 12
+  textColor: *cCandidate
+  commentColor: *cComment
+  indexColor: *cComment
+  preferredTextColor: *cCandidate
+  preferredCommentColor: *cComment
+  preferredIndexColor: *cComment
+  highlightBackgroundColor: "#FFFFFF14"
+  backgroundCornerRadius: 6
+
+# ---- 长按候选字的上下文菜单 ----
+candidateContextMenu:
+  - { name: 复制, action: { shortcut: "#copy" } }
+
+# ---- 按键区 ----
+keyboardStyle:
+  backgroundStyle: keyboardBackgroundStyle
+keyboardLayout:
+  - HStack:
+      subviews:
+        - Cell: qButton
+        - Cell: wButton
+        - Cell: eButton
+        - Cell: rButton
+        - Cell: tButton
+        - Cell: yButton
+        - Cell: uButton
+        - Cell: iButton
+        - Cell: oButton
+        - Cell: pButton
+  - HStack:
+      subviews:
+        - Cell: aButton
+        - Cell: sButton
+        - Cell: dButton
+        - Cell: fButton
+        - Cell: gButton
+        - Cell: hButton
+        - Cell: jButton
+        - Cell: kButton
+        - Cell: lButton
+  - HStack:
+      subviews:
+        - Cell: shiftButton
+        - Cell: zButton
+        - Cell: xButton
+        - Cell: cButton
+        - Cell: vButton
+        - Cell: bButton
+        - Cell: nButton
+        - Cell: mButton
+        - Cell: backspaceButton
+  - HStack:
+      subviews:
+        - Cell: numericButton
+        - Cell: spaceButton
+        - Cell: enterButton
+
+# =============================================================================
+# 共用样式
+# =============================================================================
+
+keyboardBackgroundStyle:
+  buttonStyleType: geometry
+  normalColor: *cKeyboardBg
+  highlightColor: *cKeyboardBg
+
+letterButtonBackgroundStyle:
+  buttonStyleType: geometry
+  insets: { top: 4, left: 3, bottom: 4, right: 3 }
+  cornerRadius: 8.5
+  normalColor: *cLetterBg
+  highlightColor: *cLetterBgDown
+  normalLowerEdgeColor: *cEdge
+  highlightLowerEdgeColor: *cEdge
+
+systemButtonBackgroundStyle:
+  buttonStyleType: geometry
+  insets: { top: 4, left: 3, bottom: 4, right: 3 }
+  cornerRadius: 8.5
+  normalColor: *cSystemBg
+  highlightColor: *cSystemBgDown
+  normalLowerEdgeColor: *cEdge
+  highlightLowerEdgeColor: *cEdge
+
+accentButtonBackgroundStyle:
+  buttonStyleType: geometry
+  insets: { top: 4, left: 3, bottom: 4, right: 3 }
+  cornerRadius: 8.5
+  normalColor: *cAccentBg
+  highlightColor: *cSystemBgDown
+  normalLowerEdgeColor: *cEdge
+  highlightLowerEdgeColor: *cEdge
+
+hintBackgroundStyle:
+  buttonStyleType: geometry
+  cornerRadius: 8
+  normalColor: *cLetterBg
+  highlightColor: *cLetterBg
+  normalShadowColor: "#00000040"
+  shadowRadius: 4
+  shadowOffset: { x: 0, y: 2 }
+
+# ---- 供字母按键 merge 的基底（注意：这里只能放通过 getNode 读取的 Key）----
+_base:
+  letterKey: &letterKey
+    backgroundStyle: letterButtonBackgroundStyle
+  letterFg: &letterFg
+    buttonStyleType: text
+    fontSize: 22.5
+    normalColor: *cText
+    highlightColor: *cText
+  hintBase: &hintBase
+    size: { width: 1/9, height: 1/4 }
+    backgroundStyle: hintBackgroundStyle
+  hintFg: &hintFg
+    buttonStyleType: text
+    fontSize: 28
+    normalColor: *cText
+    highlightColor: *cText
+
+# ---- 26 个字母按键 ----
+qButton: { <<: *letterKey, size: { width: 112.5/1125 }, action: { character: q }, uppercasedStateAction: { character: Q }, foregroundStyle: qFg, uppercasedStateForegroundStyle: qUpFg, hintStyle: qHint }
+wButton: { <<: *letterKey, size: { width: 112.5/1125 }, action: { character: w }, uppercasedStateAction: { character: W }, foregroundStyle: wFg, uppercasedStateForegroundStyle: wUpFg, hintStyle: wHint }
+eButton: { <<: *letterKey, size: { width: 112.5/1125 }, action: { character: e }, uppercasedStateAction: { character: E }, foregroundStyle: eFg, uppercasedStateForegroundStyle: eUpFg, hintStyle: eHint }
+rButton: { <<: *letterKey, size: { width: 112.5/1125 }, action: { character: r }, uppercasedStateAction: { character: R }, foregroundStyle: rFg, uppercasedStateForegroundStyle: rUpFg, hintStyle: rHint }
+tButton: { <<: *letterKey, size: { width: 112.5/1125 }, action: { character: t }, uppercasedStateAction: { character: T }, foregroundStyle: tFg, uppercasedStateForegroundStyle: tUpFg, hintStyle: tHint }
+yButton: { <<: *letterKey, size: { width: 112.5/1125 }, action: { character: y }, uppercasedStateAction: { character: Y }, foregroundStyle: yFg, uppercasedStateForegroundStyle: yUpFg, hintStyle: yHint }
+uButton: { <<: *letterKey, size: { width: 112.5/1125 }, action: { character: u }, uppercasedStateAction: { character: U }, foregroundStyle: uFg, uppercasedStateForegroundStyle: uUpFg, hintStyle: uHint }
+iButton: { <<: *letterKey, size: { width: 112.5/1125 }, action: { character: i }, uppercasedStateAction: { character: I }, foregroundStyle: iFg, uppercasedStateForegroundStyle: iUpFg, hintStyle: iHint }
+oButton: { <<: *letterKey, size: { width: 112.5/1125 }, action: { character: o }, uppercasedStateAction: { character: O }, foregroundStyle: oFg, uppercasedStateForegroundStyle: oUpFg, hintStyle: oHint }
+pButton: { <<: *letterKey, size: { width: 112.5/1125 }, action: { character: p }, uppercasedStateAction: { character: P }, foregroundStyle: pFg, uppercasedStateForegroundStyle: pUpFg, hintStyle: pHint }
+aButton: { <<: *letterKey, size: { width: 168.75/1125 }, bounds: { alignment: right, width: 111/168.75 }, action: { character: a }, uppercasedStateAction: { character: A }, foregroundStyle: aFg, uppercasedStateForegroundStyle: aUpFg, hintStyle: aHint }
+sButton: { <<: *letterKey, size: { width: 112.5/1125 }, action: { character: s }, uppercasedStateAction: { character: S }, foregroundStyle: sFg, uppercasedStateForegroundStyle: sUpFg, hintStyle: sHint }
+dButton: { <<: *letterKey, size: { width: 112.5/1125 }, action: { character: d }, uppercasedStateAction: { character: D }, foregroundStyle: dFg, uppercasedStateForegroundStyle: dUpFg, hintStyle: dHint }
+fButton: { <<: *letterKey, size: { width: 112.5/1125 }, action: { character: f }, uppercasedStateAction: { character: F }, foregroundStyle: fFg, uppercasedStateForegroundStyle: fUpFg, hintStyle: fHint }
+gButton: { <<: *letterKey, size: { width: 112.5/1125 }, action: { character: g }, uppercasedStateAction: { character: G }, foregroundStyle: gFg, uppercasedStateForegroundStyle: gUpFg, hintStyle: gHint }
+hButton: { <<: *letterKey, size: { width: 112.5/1125 }, action: { character: h }, uppercasedStateAction: { character: H }, foregroundStyle: hFg, uppercasedStateForegroundStyle: hUpFg, hintStyle: hHint }
+jButton: { <<: *letterKey, size: { width: 112.5/1125 }, action: { character: j }, uppercasedStateAction: { character: J }, foregroundStyle: jFg, uppercasedStateForegroundStyle: jUpFg, hintStyle: jHint }
+kButton: { <<: *letterKey, size: { width: 112.5/1125 }, action: { character: k }, uppercasedStateAction: { character: K }, foregroundStyle: kFg, uppercasedStateForegroundStyle: kUpFg, hintStyle: kHint }
+lButton: { <<: *letterKey, size: { width: 168.75/1125 }, bounds: { alignment: left, width: 111/168.75 }, action: { character: l }, uppercasedStateAction: { character: L }, foregroundStyle: lFg, uppercasedStateForegroundStyle: lUpFg, hintStyle: lHint }
+zButton: { <<: *letterKey, size: { width: 112.5/1125 }, action: { character: z }, uppercasedStateAction: { character: Z }, foregroundStyle: zFg, uppercasedStateForegroundStyle: zUpFg, hintStyle: zHint }
+xButton: { <<: *letterKey, size: { width: 112.5/1125 }, action: { character: x }, uppercasedStateAction: { character: X }, foregroundStyle: xFg, uppercasedStateForegroundStyle: xUpFg, hintStyle: xHint }
+cButton: { <<: *letterKey, size: { width: 112.5/1125 }, action: { character: c }, uppercasedStateAction: { character: C }, foregroundStyle: cFg, uppercasedStateForegroundStyle: cUpFg, hintStyle: cHint }
+vButton: { <<: *letterKey, size: { width: 112.5/1125 }, action: { character: v }, uppercasedStateAction: { character: V }, foregroundStyle: vFg, uppercasedStateForegroundStyle: vUpFg, hintStyle: vHint }
+bButton: { <<: *letterKey, size: { width: 112.5/1125 }, action: { character: b }, uppercasedStateAction: { character: B }, foregroundStyle: bFg, uppercasedStateForegroundStyle: bUpFg, hintStyle: bHint }
+nButton: { <<: *letterKey, size: { width: 112.5/1125 }, action: { character: n }, uppercasedStateAction: { character: N }, foregroundStyle: nFg, uppercasedStateForegroundStyle: nUpFg, hintStyle: nHint }
+mButton: { <<: *letterKey, size: { width: 112.5/1125 }, action: { character: m }, uppercasedStateAction: { character: M }, foregroundStyle: mFg, uppercasedStateForegroundStyle: mUpFg, hintStyle: mHint }
+
+# ---- 字母的前景样式 / 大写前景样式 / 长按气泡 ----
+qFg:     { <<: *letterFg, text: q }
+qUpFg:   { <<: *letterFg, text: Q }
+qHint:   { <<: *hintBase, foregroundStyle: qHintFg }
+qHintFg: { <<: *hintFg,   text: q }
+wFg:     { <<: *letterFg, text: w }
+wUpFg:   { <<: *letterFg, text: W }
+wHint:   { <<: *hintBase, foregroundStyle: wHintFg }
+wHintFg: { <<: *hintFg,   text: w }
+eFg:     { <<: *letterFg, text: e }
+eUpFg:   { <<: *letterFg, text: E }
+eHint:   { <<: *hintBase, foregroundStyle: eHintFg }
+eHintFg: { <<: *hintFg,   text: e }
+rFg:     { <<: *letterFg, text: r }
+rUpFg:   { <<: *letterFg, text: R }
+rHint:   { <<: *hintBase, foregroundStyle: rHintFg }
+rHintFg: { <<: *hintFg,   text: r }
+tFg:     { <<: *letterFg, text: t }
+tUpFg:   { <<: *letterFg, text: T }
+tHint:   { <<: *hintBase, foregroundStyle: tHintFg }
+tHintFg: { <<: *hintFg,   text: t }
+yFg:     { <<: *letterFg, text: y }
+yUpFg:   { <<: *letterFg, text: Y }
+yHint:   { <<: *hintBase, foregroundStyle: yHintFg }
+yHintFg: { <<: *hintFg,   text: y }
+uFg:     { <<: *letterFg, text: u }
+uUpFg:   { <<: *letterFg, text: U }
+uHint:   { <<: *hintBase, foregroundStyle: uHintFg }
+uHintFg: { <<: *hintFg,   text: u }
+iFg:     { <<: *letterFg, text: i }
+iUpFg:   { <<: *letterFg, text: I }
+iHint:   { <<: *hintBase, foregroundStyle: iHintFg }
+iHintFg: { <<: *hintFg,   text: i }
+oFg:     { <<: *letterFg, text: o }
+oUpFg:   { <<: *letterFg, text: O }
+oHint:   { <<: *hintBase, foregroundStyle: oHintFg }
+oHintFg: { <<: *hintFg,   text: o }
+pFg:     { <<: *letterFg, text: p }
+pUpFg:   { <<: *letterFg, text: P }
+pHint:   { <<: *hintBase, foregroundStyle: pHintFg }
+pHintFg: { <<: *hintFg,   text: p }
+aFg:     { <<: *letterFg, text: a }
+aUpFg:   { <<: *letterFg, text: A }
+aHint:   { <<: *hintBase, foregroundStyle: aHintFg }
+aHintFg: { <<: *hintFg,   text: a }
+sFg:     { <<: *letterFg, text: s }
+sUpFg:   { <<: *letterFg, text: S }
+sHint:   { <<: *hintBase, foregroundStyle: sHintFg }
+sHintFg: { <<: *hintFg,   text: s }
+dFg:     { <<: *letterFg, text: d }
+dUpFg:   { <<: *letterFg, text: D }
+dHint:   { <<: *hintBase, foregroundStyle: dHintFg }
+dHintFg: { <<: *hintFg,   text: d }
+fFg:     { <<: *letterFg, text: f }
+fUpFg:   { <<: *letterFg, text: F }
+fHint:   { <<: *hintBase, foregroundStyle: fHintFg }
+fHintFg: { <<: *hintFg,   text: f }
+gFg:     { <<: *letterFg, text: g }
+gUpFg:   { <<: *letterFg, text: G }
+gHint:   { <<: *hintBase, foregroundStyle: gHintFg }
+gHintFg: { <<: *hintFg,   text: g }
+hFg:     { <<: *letterFg, text: h }
+hUpFg:   { <<: *letterFg, text: H }
+hHint:   { <<: *hintBase, foregroundStyle: hHintFg }
+hHintFg: { <<: *hintFg,   text: h }
+jFg:     { <<: *letterFg, text: j }
+jUpFg:   { <<: *letterFg, text: J }
+jHint:   { <<: *hintBase, foregroundStyle: jHintFg }
+jHintFg: { <<: *hintFg,   text: j }
+kFg:     { <<: *letterFg, text: k }
+kUpFg:   { <<: *letterFg, text: K }
+kHint:   { <<: *hintBase, foregroundStyle: kHintFg }
+kHintFg: { <<: *hintFg,   text: k }
+lFg:     { <<: *letterFg, text: l }
+lUpFg:   { <<: *letterFg, text: L }
+lHint:   { <<: *hintBase, foregroundStyle: lHintFg }
+lHintFg: { <<: *hintFg,   text: l }
+zFg:     { <<: *letterFg, text: z }
+zUpFg:   { <<: *letterFg, text: Z }
+zHint:   { <<: *hintBase, foregroundStyle: zHintFg }
+zHintFg: { <<: *hintFg,   text: z }
+xFg:     { <<: *letterFg, text: x }
+xUpFg:   { <<: *letterFg, text: X }
+xHint:   { <<: *hintBase, foregroundStyle: xHintFg }
+xHintFg: { <<: *hintFg,   text: x }
+cFg:     { <<: *letterFg, text: c }
+cUpFg:   { <<: *letterFg, text: C }
+cHint:   { <<: *hintBase, foregroundStyle: cHintFg }
+cHintFg: { <<: *hintFg,   text: c }
+vFg:     { <<: *letterFg, text: v }
+vUpFg:   { <<: *letterFg, text: V }
+vHint:   { <<: *hintBase, foregroundStyle: vHintFg }
+vHintFg: { <<: *hintFg,   text: v }
+bFg:     { <<: *letterFg, text: b }
+bUpFg:   { <<: *letterFg, text: B }
+bHint:   { <<: *hintBase, foregroundStyle: bHintFg }
+bHintFg: { <<: *hintFg,   text: b }
+nFg:     { <<: *letterFg, text: n }
+nUpFg:   { <<: *letterFg, text: N }
+nHint:   { <<: *hintBase, foregroundStyle: nHintFg }
+nHintFg: { <<: *hintFg,   text: n }
+mFg:     { <<: *letterFg, text: m }
+mUpFg:   { <<: *letterFg, text: M }
+mHint:   { <<: *hintBase, foregroundStyle: mHintFg }
+mHintFg: { <<: *hintFg,   text: m }
+
+# ---- 功能按键 ----
+shiftButton:
+  size: { width: 168.75/1125 }
+  bounds: { alignment: left, width: 151/168.75 }
+  action: shift
+  backgroundStyle: systemButtonBackgroundStyle
+  foregroundStyle: shiftButtonForegroundStyle
+  uppercasedStateForegroundStyle: shiftButtonUppercasedForegroundStyle
+  capsLockedStateForegroundStyle: shiftButtonCapsLockedForegroundStyle
+shiftButtonForegroundStyle:
+  buttonStyleType: systemImage
+  systemImageName: shift
+  fontSize: 18
+  normalColor: *cText
+  highlightColor: *cText
+shiftButtonUppercasedForegroundStyle:
+  buttonStyleType: systemImage
+  systemImageName: shift.fill
+  fontSize: 18
+  normalColor: *cText
+  highlightColor: *cText
+shiftButtonCapsLockedForegroundStyle:
+  buttonStyleType: systemImage
+  systemImageName: capslock.fill
+  fontSize: 18
+  normalColor: *cText
+  highlightColor: *cText
+
+backspaceButton:
+  size: { width: 168.75/1125 }
+  bounds: { alignment: right, width: 151/168.75 }
+  action: backspace
+  repeatAction: backspace
+  backgroundStyle: systemButtonBackgroundStyle
+  foregroundStyle: backspaceButtonForegroundStyle
+backspaceButtonForegroundStyle:
+  buttonStyleType: systemImage
+  systemImageName: delete.left
+  fontSize: 18
+  normalColor: *cText
+  highlightColor: *cText
+
+numericButton:
+  size: { width: 280/1125 }
+  action: { keyboardType: numeric }
+  backgroundStyle: systemButtonBackgroundStyle
+  foregroundStyle: numericButtonForegroundStyle
+numericButtonForegroundStyle:
+  buttonStyleType: text
+  text: "123"
+  fontSize: 16
+  normalColor: *cText
+  highlightColor: *cText
+
+spaceButton:
+  action: space
+  backgroundStyle: letterButtonBackgroundStyle
+  foregroundStyle: spaceButtonForegroundStyle
+  swipeUpAction: { shortcut: "#次选上屏" }
+spaceButtonForegroundStyle:
+  buttonStyleType: text
+  text: "$rimeSchemaName"
+  fontSize: 14
+  normalColor: *cText
+  highlightColor: *cText
+
+enterButton:
+  size: { width: 280/1125 }
+  action: enter
+  backgroundStyle: accentButtonBackgroundStyle
+  foregroundStyle: enterButtonForegroundStyle
+enterButtonForegroundStyle:
+  buttonStyleType: text
+  text: "$returnKeyType"
+  fontSize: 16
+  normalColor: *cTextOnAccent
+  highlightColor: *cText
