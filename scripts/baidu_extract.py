@@ -79,6 +79,24 @@ class Skin:
             self._til[name] = rects
         return self._til[name]
 
+    def til_insets(self, name, idx):
+        """INNER_RECT（绝对坐标的九宫格内框）-> 元书的 insets 保护区。
+
+        没有 INNER_RECT、或它与 SOURCE_RECT 一致 = 整张拉伸，返回 None。
+        """
+        path = os.path.join(self.res, name + ".til")
+        if not os.path.exists(path):
+            return None
+        kv = parse_ini(path).get("IMG%d" % idx, {})
+        src, inner = ints(kv.get("SOURCE_RECT", "")), ints(kv.get("INNER_RECT", ""))
+        if len(src) != 4 or len(inner) != 4 or inner[2] <= 0 or inner[3] <= 0:
+            return None
+        left, top = inner[0] - src[0], inner[1] - src[1]
+        right, bottom = src[2] - left - inner[2], src[3] - top - inner[3]
+        if min(left, top, right, bottom) < 0 or max(left, top, right, bottom) == 0:
+            return None
+        return [max(left, 0), max(top, 0), max(right, 0), max(bottom, 0)]
+
     def img(self, name):
         if name not in self._img:
             self._img[name] = Image.open(os.path.join(self.res, name + ".png")).convert("RGBA")
@@ -90,9 +108,16 @@ class Skin:
 
     # -- 样式 ------------------------------------------------------------
     def style_img(self, sid, pressed=False):
-        """STYLE 号 -> (拼合图名, 小图序号)，该样式不画图时返回 None。"""
+        """STYLE 号 -> (拼合图名, 小图序号)，该样式不画图时返回 None。
+
+        只写了 NM_IMG 的样式，按下时沿用普通态的图；
+        只写了 HL_IMG 的样式（按下才出现的角标 / 水印）普通态**不画**——
+        这里不能反向回退，否则那层会漏进普通态。
+        """
         s = self.css.get("STYLE%s" % sid, {})
-        v = s.get("HL_IMG" if pressed else "NM_IMG")
+        v = s.get("HL_IMG") if pressed else None
+        if not v:
+            v = s.get("NM_IMG")
         if not v or "," not in v:
             return None
         f, i = v.split(",", 1)
@@ -123,9 +148,9 @@ def compose(skin, sec, pressed):
     pos = [s for s in sec.get("POS_TYPE", "").split(",") if s.strip()]
     drew = False
     for i, sid in enumerate(fore):
-        ref = skin.style_img(sid, pressed) or skin.style_img(sid, not pressed)
+        ref = skin.style_img(sid, pressed)
         if not ref:
-            continue                              # 空样式，原皮肤里也不画
+            continue                              # 空样式 / 该状态不画
         fname, idx = ref
         if idx not in skin.til(fname):
             continue
@@ -154,11 +179,16 @@ def pack(tiles, max_width=2048, pad=4):
     return sheet, placed
 
 
-def rect_yaml(rects):
-    return "".join(
-        "%s:\n  rect: { x: %d, y: %d, width: %d, height: %d }\n" % (n, *r)
-        for n, r in rects.items()
-    ) or "{}\n"
+def rect_yaml(rects, insets=None):
+    """rects: {名字: (x, y, w, h)}；insets: {名字: (左, 上, 右, 下)}，可选。"""
+    insets = insets or {}
+    out = []
+    for n, r in rects.items():
+        out.append("%s:\n  rect:   { x: %d, y: %d, width: %d, height: %d }\n" % (n, *r))
+        ins = insets.get(n)
+        if ins:
+            out.append("  insets: { left: %d, top: %d, right: %d, bottom: %d }\n" % tuple(ins))
+    return "".join(out) or "{}\n"
 
 
 # --------------------------------------------------------------------------- 主流程
@@ -190,6 +220,20 @@ def run(src, dest, layouts):
             continue
         layout = parse_ini(path)
         pw, ph = skin.panel_size(layout)
+
+        # [TIP*] 自己没有 VIEW_RECT，画布尺寸取引用它的那颗键（STAT_STYLE=S1_3|S2_4 …）
+        tip_owner = {}
+        for sec_name, sec in layout.items():
+            if not re.match(r"^KEY\d+$", sec_name):
+                continue
+            for pair in (sec.get("STAT_STYLE") or "").split("|"):
+                m = re.match(r"^(S\d+)_(\d+)$", pair.strip())
+                if m:
+                    tip_owner.setdefault("TIP" + m.group(2), (sec_name, m.group(1)))
+        for tip, (owner, _state) in tip_owner.items():
+            if tip in layout and not layout[tip].get("VIEW_RECT"):
+                layout[tip]["VIEW_RECT"] = layout[owner].get("VIEW_RECT", "")
+
         keys = {}
         for sec_name, sec in layout.items():
             if not re.match(r"^(KEY|TIP)\d+$", sec_name):
@@ -213,6 +257,9 @@ def run(src, dest, layouts):
                 "hold": sec.get("HOLD"), "holdSymbols": sec.get("HOLDSYM"),
                 "statStyle": sec.get("STAT_STYLE"),
             }
+            if sec_name in tip_owner:
+                owner, state = tip_owner[sec_name]
+                keys[sec_name]["tipOf"] = {"key": owner, "state": state}
         summary[lname] = {"panelSize": [pw, ph], "keys": keys,
                           "list": layout.get("LIST"), "hint": layout.get("HINT")}
 
@@ -235,19 +282,24 @@ def run(src, dest, layouts):
             print("  写出 fg_%s%s（%d 块）" % (lname, suffix, len(tiles)))
 
     # 背景拼合图：原样复制 + 翻译 .til
-    used_sheets.add("bj")
+    # bj = 面板背景，hint = 长按/短按气泡（由 .pop 引用，不出现在 BACK_STYLE 里）
+    used_sheets.update(("bj", "hint"))
     for name in sorted(used_sheets):
         png = os.path.join(skin.res, name + ".png")
         if not os.path.exists(png):
             continue
         shutil.copy(png, os.path.join(resdir, name + ".png"))
-        rects = {}
+        rects, insets = {}, {}
         for i, r in sorted(skin.til(name).items()):
             if name == "bj" and Image is not None:
                 r = [r[0], r[1], r[2], opaque_height(skin, name, r)]
             rects["k%d" % i] = r
-        open(os.path.join(resdir, name + ".yaml"), "w", encoding="utf-8").write(rect_yaml(rects))
-        print("  背景 %s（%d 块）" % (name, len(rects)))
+            ins = skin.til_insets(name, i)
+            if ins:
+                insets["k%d" % i] = ins
+        open(os.path.join(resdir, name + ".yaml"), "w", encoding="utf-8").write(
+            rect_yaml(rects, insets))
+        print("  背景 %s（%d 块，%d 块带九宫格保护区）" % (name, len(rects), len(insets)))
 
     out_json = os.path.join(dest, "baidu_layout.json")
     with open(out_json, "w", encoding="utf-8") as fh:
