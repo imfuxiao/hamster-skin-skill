@@ -35,6 +35,7 @@ jsonnet 生成 YAML，但手写皮肤直接产出 YAML 更可靠，元书加载�
   尺寸分配、样式解析、合并键陷阱。
 - `references/keys.md` — 全部 Key、类型、默认值、枚举取值的权威索引。写任何 Key 前先查。
 - `references/recipes.md` — 可直接复制的片段（渐变、阴影、条件样式、通知、长按面板、动画等）。
+- `references/baidu-skin.md` — 只在**转换百度输入法皮肤**（`.bdi` / `.bds`）时读，见下方专章。
 
 ### 第 3 步：从模板起步
 
@@ -107,6 +108,41 @@ python3 <skill目录>/scripts/validate_skin.py <皮肤目录>
 - 安装方式：把文件传到 iOS 设备，用元书打开即可导入
 - 后续想微调可以直接说（如「键帽再圆一点」「空格键换成显示方案名」）
 
+## 转换百度输入法图片皮肤
+
+用户给的是 `.bdi` / `.bds`（或已解包的目录）时走这条路，**不要**照着截图重新配色——
+背景、键帽、字形、图标全都能原样复用，成品跟原皮肤几乎一模一样。
+
+先读 `references/baidu-skin.md`（格式速查 + 功能键表 + 映射表 + 坑），然后：
+
+```bash
+# 0. .bdi 本质是 zip，先解包
+unzip -q <皮肤>.bdi -d <工作目录>/src
+
+# 1. 确认 light/dark 的布局 ini 是否相同（通常完全相同，能省一半工作）
+diff <工作目录>/src/dark/skin/port/py_26.ini <工作目录>/src/light/skin/port/py_26.ini
+
+# 2. 提取资源：背景图原样复制 + .til 翻成图片描述 yaml + 前景层按 [OFFSET*] 预合成
+python3 <skill目录>/scripts/baidu_extract.py \
+    <工作目录>/src/dark/skin  <皮肤名>/dark  py_26 py_9
+python3 <skill目录>/scripts/baidu_extract.py \
+    <工作目录>/src/light/skin <皮肤名>/light py_26 py_9
+```
+
+脚本还会输出 `<皮肤名>/<light|dark>/baidu_layout.json`——每个键的
+`viewRect` / `touchRect` / 背景图 / `center`、`up`、`holdSymbols` 等，
+**照着它写键盘 yaml**，不要再回头去啃 ini。
+
+要点：
+
+- `[PANEL] SIZE` 是设计稿坐标系，把 `viewRect` 直接写成 `size: { width: <值>/<设计稿宽> }`。
+- `touchRect` 比 `viewRect` 大的边缘键，用 `size` 取触摸宽 + `bounds` 取绘制宽。
+- 跨多个键的长条背景（空格＋中英、跨两行的回车），按比例把切片切开，或改用 `VStack` 独占一列。
+- 功能键 `F*` → 元书动作的对照表在 `references/baidu-skin.md`。
+- 左右划动元书不支持，只能丢弃或挪进长按面板。
+
+做完后照常走第 5 步校验、第 6 步打包。
+
 ## 硬性规则
 
 1. **每个引用的样式名都必须在根节点存在**。这是第一大坑，且失败是静默的。
@@ -127,8 +163,10 @@ references/
   architecture.md   运行机制：区域、布局、样式解析、坑
   keys.md           全部 Key 索引（类型 / 默认值 / 枚举）
   recipes.md        可复制的配方片段
+  baidu-skin.md     百度输入法皮肤格式 + 转换映射表（转 .bdi/.bds 时才读）
 assets/template/    已通过校验的完整皮肤模板
 scripts/
   validate_skin.py  校验器（优先用 PyYAML，缺失时自动回退到 macOS 自带 ruby 解析 YAML）
   package_skin.sh   打包成 .cskin（内置校验）
+  baidu_extract.py  从百度皮肤提取资源：背景图 + 预合成前景 + 布局摘要 json
 ```

@@ -50,7 +50,21 @@ rsync -a \
 
 OUT_FILE="$OUT_DIR/$SKIN_NAME.cskin"
 rm -f "$OUT_FILE"
-( cd "$STAGE" && zip -qr "$OUT_FILE" "$SKIN_NAME" -x "*.DS_Store" "*/.*" )
+# 用 python 的 zipfile 打包：它会给非 ASCII 文件名打上 UTF-8 标志位，
+# 而 macOS 自带的 zip 不会——皮肤名是中文时导入后会变成乱码。
+python3 - "$STAGE" "$SKIN_NAME" "$OUT_FILE" <<'PY'
+import os, sys, zipfile
+
+stage, name, out = sys.argv[1], sys.argv[2], sys.argv[3]
+with zipfile.ZipFile(out, "w", zipfile.ZIP_DEFLATED) as z:
+    for root, dirs, files in os.walk(os.path.join(stage, name)):
+        dirs[:] = [d for d in dirs if not d.startswith(".")]
+        for f in sorted(files):
+            if f.startswith(".") or f == ".DS_Store":
+                continue
+            p = os.path.join(root, f)
+            z.write(p, os.path.relpath(p, stage))
+PY
 
 echo "==> 已生成: $OUT_FILE"
 echo "    大小: $(du -h "$OUT_FILE" | cut -f1)"

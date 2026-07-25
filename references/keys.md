@@ -347,6 +347,8 @@
 | `offset` | `Point` | `{ x: 0, y: 0 }` | 面板整体偏移。 |
 | `anchor` | `GridCell` | — | 锚点单元格；设置后该单元格中心与按键中心对齐，否则面板显示在按键正上方并水平居中。越界时视为未设置。 |
 | `selected` | `GridCell` | — | 初始高亮的单元格。 |
+| `moveStep` | `{ horizontal: Float, vertical: Float }` | 单元格尺寸 + `spacing` | 相对位移选择的灵敏度：手指移动多少距离切换一个单元格，值越小越灵敏。 |
+| `moveThreshold` | `Float` | `10` | 相对位移选择的最小移动距离；位移未超过时维持初始状态（`selected` 单元格或无高亮）。 |
 | `backgroundStyle` | `String` | — | 面板背景样式名。 |
 | `selectedBackgroundStyle` | `String` | — | 高亮单元格的背景样式名。 |
 | `checkIfOverflowsParentHeight` | `Bool` | `true` | 同上。 |

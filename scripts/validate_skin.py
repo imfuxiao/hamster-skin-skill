@@ -454,10 +454,19 @@ class SkinValidator(object):
         if not node.get("toolbarStyle"):
             self.r.warn(rel, "未定义 toolbarStyle，工具栏区不会被创建")
 
+        # 先扫一遍，收集 dataSource 指向的根 Key（它们是数组，不是样式）
+        self.data_sources = set()
+        for value in node.values():
+            if isinstance(value, dict) and isinstance(value.get("dataSource"), str):
+                self.data_sources.add(value["dataSource"])
+
         # 只有值为映射的根 Key 才算「样式」；标量根 Key 是多余内容
         candidate_keys = [k for k in node if k not in STRUCTURAL_KEYS]
         style_names = set(k for k in candidate_keys if isinstance(node[k], dict))
-        stray = [k for k in candidate_keys if not isinstance(node[k], dict)]
+        stray = [
+            k for k in candidate_keys
+            if not isinstance(node[k], dict) and k not in self.data_sources
+        ]
         if stray:
             self.r.warn(
                 rel,
@@ -474,6 +483,15 @@ class SkinValidator(object):
             preedit_fg.update(
                 extract_style_names(node["preeditStyle"].get("foregroundStyle"))
             )
+
+        # 集合视图单元格（cellStyle）的文字由 dataSource 提供，同样豁免该检查。
+        for value in node.values():
+            if not isinstance(value, dict):
+                continue
+            for cell_name in extract_style_names(value.get("cellStyle")):
+                cell = node.get(cell_name)
+                if isinstance(cell, dict):
+                    preedit_fg.update(extract_style_names(cell.get("foregroundStyle")))
 
         for lk in LAYOUT_KEYS:
             if lk in node:
@@ -505,6 +523,12 @@ class SkinValidator(object):
 
         for missing in sorted(referenced - style_names):
             self.r.error(rel, "引用了不存在的样式 `%s`（该处会渲染为空白）" % missing)
+
+        for name in sorted(self.data_sources):
+            if name not in node:
+                self.r.error(rel, "dataSource `%s` 在根节点不存在（符号列表会是空的）" % name)
+            elif not isinstance(node[name], list):
+                self.r.error(rel, "dataSource `%s` 必须是数组" % name)
 
         unused = [n for n in (style_names - referenced) if not n.startswith("_")]
         if unused:
@@ -611,8 +635,9 @@ class SkinValidator(object):
             else:
                 self.r.error("%s/symbolRows" % where, "必须是二维数组")
 
+        # dataSource 指向根节点下的一个「数组」，不是样式节点，单独记录后另行校验
         if isinstance(node.get("dataSource"), str):
-            referenced.add(node["dataSource"])
+            self.data_sources.add(node["dataSource"])
 
         self.validate_enum(where, node, "buttonStyleType", BUTTON_STYLE_TYPES)
         self.validate_enum(where, node, "type", CELL_TYPES)
