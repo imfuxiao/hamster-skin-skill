@@ -71,6 +71,30 @@
 - 没有定义 `keyboardStyle` → 按键区**根本不会被创建**；`toolbarStyle` 同理。
   即使不需要背景，也要至少写 `keyboardStyle: {}` 之外的有效内容（通常给个背景样式）。
 
+### 三个高度取多少
+
+iPhone 竖屏（宽 390pt）的常用区间：`preeditHeight` 25–30、`toolbarHeight` 40–46、
+`keyboardHeight` 210–230。系统自带键盘的按键区约 216pt，中文输入法通常再高一点。
+
+`keyboardHeight` 是最容易被用户一眼看出不对的值，而且它是**固定点值**、不随屏宽缩放
+（官方皮肤 iPhone 竖屏写死 216）。所以一套皮肤实际上是**针对某个屏宽**调的：
+
+| 屏宽 | 机型举例 |
+| --- | --- |
+| 390pt | iPhone 13 / 14 / 15 |
+| 393pt | iPhone 15 Pro / 16 |
+| 428pt | iPhone 12–14 Plus / Pro Max |
+| 430pt | iPhone 15 / 16 Pro Max |
+
+**同一套皮肤里所有以点为单位的值（`keyboardHeight`、`insets`、字号、气泡尺寸、
+动画位移）必须按同一个屏宽换算**，否则会出现「高度按 428 算、内边距按 390 算」的错配——
+这种错配在任何一台设备上都不对。宽度尽量用 `分子/分母` 分数，天然跨设备。
+
+移植现成皮肤时，目标高度按原皮肤的面板宽高比算：`屏宽 × 面板高 / 面板宽`。
+
+无论怎么定，生成完都用 `scripts/preview_skin.py` 渲一张出来看——
+校验器查不出几何问题，只有图能。
+
 ## 3. 布局：HStack 是「行」，VStack 是「列」
 
 这里的命名与直觉相反，务必记牢：
@@ -103,6 +127,38 @@ keyboardLayout:
 - 同级数组中不能同时出现 `HStack` 与 `Cell`
 - 同级数组中不能同时出现 `VStack` 与 `Cell`
 - `Cell` 不能直接放在布局根数组，必须是 `HStack` 或 `VStack` 的子节点
+
+约束只针对**同级**，**嵌套是自由的**——`VStack` 的 `subviews` 里可以放一串 `HStack`，
+反之亦然。有跨行 / 跨列的键时就靠这一点：
+
+```yaml
+# 九宫格：回车跨 2 行、左侧符号栏跨 3 行，一行一个 HStack 排不下，改成三列
+keyboardLayout:
+  - VStack:                        # 左列
+      style: colLeft
+      subviews:
+        - Cell: symbolListCell     # 占 3 行高
+        - Cell: symbolicButton     # 占 1 行高
+  - VStack:                        # 中列：列里再套 4 个 HStack = 4 行
+      style: colCenter
+      subviews:
+        - HStack: { subviews: [ { Cell: k1 }, { Cell: k2 }, { Cell: k3 } ] }
+        - HStack: { subviews: [ { Cell: k4 }, { Cell: k5 }, { Cell: k6 } ] }
+  - VStack:                        # 右列
+      style: colRight
+      subviews:
+        - Cell: backspaceButton
+        - Cell: enterButton        # 占 2 行高
+
+colLeft:   { size: { width: 174/1098 } }
+colCenter: { size: { width: 750/1098 } }
+colRight:  { size: { width: 174/1098 } }
+```
+
+`VStack` 里的 `Cell` 与 `HStack` 都是自上而下分**高度**，所以「占几行」直接写
+`size: { height: 429/572 }` 这样的分数即可。
+容器自己的尺寸来自 `style` 指向的样式节点里的 `size`——那个节点只用来取尺寸，
+不需要 `buttonStyleType`。
 
 ## 4. 尺寸分配算法
 

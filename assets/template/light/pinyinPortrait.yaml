@@ -68,15 +68,64 @@ verticalCandidatesStyle:
   backgroundStyle: keyboardBackgroundStyle
   insets: { top: 4, left: 4, right: 4 }
 verticalCandidatesLayout:
-  - HStack:
+  - HStack:                                # 不写 size，吃掉剩余高度
       subviews:
         - Cell: verticalCandidatesCell
+  - HStack:                                # 底部功能行：翻页 / 收起 / 退格
+      style: verticalLastRowStyle
+      subviews:
+        - Cell: verticalPageUpButton
+        - Cell: verticalPageDownButton
+        - Cell: verticalReturnButton
+        - Cell: verticalBackspaceButton
 verticalCandidatesCell:
   type: verticalCandidates
   candidateStyle: candidateCellStyle
   maxRows: 4
   maxColumns: 5
   separatorColor: "#C8C9CC"
+verticalLastRowStyle: { size: { height: 45 } }
+verticalPageUpButton:
+  action: { shortcut: "#verticalCandidatesPageUp" }
+  backgroundStyle: systemButtonBackgroundStyle
+  foregroundStyle: verticalPageUpButtonForegroundStyle
+verticalPageDownButton:
+  action: { shortcut: "#verticalCandidatesPageDown" }
+  backgroundStyle: systemButtonBackgroundStyle
+  foregroundStyle: verticalPageDownButtonForegroundStyle
+verticalReturnButton:
+  action: { shortcut: "#candidatesBarStateToggle" }
+  backgroundStyle: systemButtonBackgroundStyle
+  foregroundStyle: verticalReturnButtonForegroundStyle
+verticalBackspaceButton:
+  action: backspace
+  repeatAction: backspace
+  backgroundStyle: systemButtonBackgroundStyle
+  foregroundStyle: verticalBackspaceButtonForegroundStyle
+verticalPageUpButtonForegroundStyle:
+  buttonStyleType: systemImage
+  systemImageName: chevron.up
+  fontSize: 20
+  normalColor: *cText
+  highlightColor: *cText
+verticalPageDownButtonForegroundStyle:
+  buttonStyleType: systemImage
+  systemImageName: chevron.down
+  fontSize: 20
+  normalColor: *cText
+  highlightColor: *cText
+verticalReturnButtonForegroundStyle:
+  buttonStyleType: systemImage
+  systemImageName: return
+  fontSize: 20
+  normalColor: *cText
+  highlightColor: *cText
+verticalBackspaceButtonForegroundStyle:
+  buttonStyleType: systemImage
+  systemImageName: delete.left
+  fontSize: 20
+  normalColor: *cText
+  highlightColor: *cText
 
 # ---- 候选字单元格样式（横向 / 纵向共用）----
 candidateCellStyle:

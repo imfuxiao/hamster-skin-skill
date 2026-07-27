@@ -88,7 +88,37 @@ python3 <skill目录>/scripts/validate_skin.py <皮肤目录>
 
 警告可以酌情忽略，但「引用了不存在的样式」「颜色格式非法」这类**错误**必须清零。
 
-### 第 6 步：打包
+### 第 6 步：出预览图看一眼（不可跳过）
+
+```bash
+python3 <skill目录>/scripts/preview_skin.py <皮肤目录> [输出目录]
+```
+
+按元书的布局算法给每个键盘的 light / dark 各渲**四张** png，**用 Read 工具打开看**：
+
+| 文件 | 内容 |
+| --- | --- |
+| `preview_<side>_<名>.png` | 常态 |
+| `..._pressed.png` | 全部按键的按下态（`highlightImage`、按下才出现的图层对不对） |
+| `..._hint.png` | 长按符号面板（红框标出格子边界，高亮块应比红框小一圈） |
+| `..._vertical.png` | 纵向候选栏展开态（底部功能行在不在、键帽有没有被压扁） |
+
+校验器只能查结构，查不出几何问题；下面这些**只有看图才发现得了**：
+
+- 键盘整体偏矮 / 偏高，键帽被压扁
+- 某一行没铺满或溢出（`size` 分子之和 ≠ 分母）
+- 跨行 / 跨列的键错位
+- 长按面板整片伸出屏幕、高亮块顶满格子
+- 按下态整片空白（`fileImage` 只写了 `normalImage`——按下态**不会**回退，直接画空）
+- 九宫格保护区比目标还大，图糊成一坨
+- 前景图层跑到键外、深色皮肤下透出底色
+
+转换现成皮肤时，把预览图和原皮肤的 `demo.png` **并排比一眼**再交付。
+
+需要 Pillow 与 PyYAML。系统 python 装不上时（PEP 668）建一个 venv：
+`python3 -m venv venv && ./venv/bin/pip install Pillow pyyaml`。
+
+### 第 7 步：打包
 
 ```bash
 <skill目录>/scripts/package_skin.sh <皮肤目录> [输出目录]
@@ -97,9 +127,9 @@ python3 <skill目录>/scripts/validate_skin.py <皮肤目录>
 脚本会先自动跑校验，通过后生成 `<皮肤名>.cskin`。
 
 打包前记得放一张 `demo.png`（应用内的皮肤预览图）。没有时提醒用户补，
-或用截图工具生成一张占位图。
+或直接拿第 6 步的预览图充数。
 
-### 第 7 步：交付
+### 第 8 步：交付
 
 告诉用户：
 
@@ -123,6 +153,7 @@ unzip -q <皮肤>.bdi -d <工作目录>/src
 diff <工作目录>/src/dark/skin/port/py_26.ini <工作目录>/src/light/skin/port/py_26.ini
 
 # 2. 提取资源：背景图原样复制 + .til 翻成图片描述 yaml + 前景层按 [OFFSET*] 预合成
+#    + 解析 anim.ini + 反推 keyboardHeight
 python3 <skill目录>/scripts/baidu_extract.py \
     <工作目录>/src/dark/skin  <皮肤名>/dark  py_26 py_9
 python3 <skill目录>/scripts/baidu_extract.py \
@@ -130,18 +161,27 @@ python3 <skill目录>/scripts/baidu_extract.py \
 ```
 
 脚本还会输出 `<皮肤名>/<light|dark>/baidu_layout.json`——每个键的
-`viewRect` / `touchRect` / 背景图 / `center`、`up`、`holdSymbols` 等，
-**照着它写键盘 yaml**，不要再回头去啃 ini。
+`viewRect` / `touchRect` / 背景图 / `center`、`up`、`holdSymbols`、动画、按键音，
+以及换算好的 `metrics`。**照着它写键盘 yaml**，不要再回头去啃 ini。
 
 要点：
 
-- `[PANEL] SIZE` 是设计稿坐标系，把 `viewRect` 直接写成 `size: { width: <值>/<设计稿宽> }`。
+- **`keyboardHeight` 用 `metrics.keyboardHeight`**，别拿 `[PANEL] SIZE` 的高宽比去算——
+  那只是设计稿坐标系，照它折算键会明显偏矮，是这类转换的头号翻车点。
+  `metrics` 里还有 `rowHeight` / `unitX` / `unitY` / `insetTop` / `insetBottom`。
+- `viewRect` 直接写成 `size: { width: <值>/<设计稿宽> }`；竖直方向的数值换算用 `unitY`，
+  水平方向用 `unitX`，**两个方向比例不同，别混用**。
 - `touchRect` 比 `viewRect` 大的边缘键，用 `size` 取触摸宽 + `bounds` 取绘制宽。
-- 跨多个键的长条背景（空格＋中英、跨两行的回车），按比例把切片切开，或改用 `VStack` 独占一列。
+- 跨多个键 / 跨行的长条（空格＋中英、跨两行的回车、九宫格左侧符号栏）：
+  改用 `VStack` 分列，列里再套 `HStack` 排行。
+- `pressAnimation` → `animationType: scale`；`splashAnimations` → `animationType: physics`
+  （对应的贴图已经单独导成 `anim_*.png`，并且**已从 `fg_*ax` 里剔除**，直接引用即可）。
 - 功能键 `F*` → 元书动作的对照表在 `references/baidu-skin.md`。
-- 左右划动元书不支持，只能丢弃或挪进长按面板。
+- 左右划动、长按动作元书都不支持，只能丢弃或挪到上下划 / 长按符号面板。
+- 源皮肤本身可能就缺图（某个字母是空的、是白色的），**先对着 `demo.png` 确认**，
+  多半是设计使然，不要自作主张补画。
 
-做完后照常走第 5 步校验、第 6 步打包。
+做完后照常走第 5 步校验、**第 6 步出预览图和 `demo.png` 对比**、第 7 步打包。
 
 ## 硬性规则
 
@@ -154,19 +194,26 @@ python3 <skill目录>/scripts/baidu_extract.py \
 7. **划动只有上下**，没有 `swipeLeftAction` / `swipeRightAction`。
 8. 不穿透合并键 `<<` 的 Key（`type`、`maxColumns`、`maxRows`、`colorLocation`、
    `shadowOpacity` 等）必须直接写在使用它的节点内。
-9. 生成完**必须跑校验**，0 错误才算交付。
+9. 生成完**必须跑校验**，0 错误才算交付；**并且必须出预览图亲眼看过**。
+10. 三种动画各管一件事：`scale` 只缩放、`cartoon` 只在原地逐帧播、
+    **`physics` 是唯一能做位移的**。别说「元书做不了位移」。
+11. **`verticalCandidatesLayout` 底部要放 上一页 / 下一页 / 返回 / 退格 四个键**，
+    只给一个候选列表的话用户翻不了页也退不出来。片段见 `recipes.md`。
+12. 长按面板：高亮块用 `insets` 收进格子里；面板按各键的横坐标算 `anchor`，
+    否则靠边的键会把面板顶出屏幕；面板背景别用保护区大于目标尺寸的九宫格图。
 
 ## 目录
 
 ```
 references/
-  architecture.md   运行机制：区域、布局、样式解析、坑
+  architecture.md   运行机制：区域、布局（含跨行跨列）、三个高度怎么定、样式解析、坑
   keys.md           全部 Key 索引（类型 / 默认值 / 枚举）
-  recipes.md        可复制的配方片段
+  recipes.md        可直接复制的配方片段
   baidu-skin.md     百度输入法皮肤格式 + 转换映射表（转 .bdi/.bds 时才读）
 assets/template/    已通过校验的完整皮肤模板
 scripts/
   validate_skin.py  校验器（优先用 PyYAML，缺失时自动回退到 macOS 自带 ruby 解析 YAML）
+  preview_skin.py   按元书布局算法渲成 png，用来肉眼检查几何（需 Pillow + PyYAML）
   package_skin.sh   打包成 .cskin（内置校验）
-  baidu_extract.py  从百度皮肤提取资源：背景图 + 预合成前景 + 布局摘要 json
+  baidu_extract.py  从百度皮肤提取：背景图 + 预合成前景 + physics 用图 + 布局摘要 json
 ```

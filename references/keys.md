@@ -380,16 +380,16 @@
 
 | Key | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| `animationType` | 枚举 | — | 必填。`scale` / `cartoon` / `physics`。 |
+| `animationType` | 枚举 | — | 必填。`scale` / `cartoon` / `physics` / `transform`。 |
 
 #### `animationType: scale`
 
 | Key | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| `scale` | `Float` | 内置 | 缩放比例。 |
+| `scale` | `Float` | `0.95` | 缩放比例。 |
 | `pressDuration` | `Float` | 内置 | 按下动画时长，**单位为毫秒**。 |
 | `releaseDuration` | `Float` | 内置 | 抬起动画时长，**单位为毫秒**。 |
-| `isAutoReverse` | `Bool` | 内置 | 是否自动反向播放。 |
+| `isAutoReverse` | `Bool` | `false` | 是否自动反向播放（按下缩小、抬起复原）。 |
 
 #### `animationType: cartoon`
 
@@ -409,21 +409,98 @@
 
 | Key | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| `images` | `[String]` | — | 必填。参与动画的图片文件名数组。 |
-| `targetScale` | `Float` | — | 图片等比缩小比例。 |
+| `images` | `[String]` | — | 必填。参与动画的图片文件名（**含后缀**），取自当前键盘配置文件目录的 `resources/`。 |
+| `targetScale` | `Float` | — | 图片等比缩放比例（图片像素 → 点）。 |
 | `duration` | `Float` | 内置 | 动画时长，**单位为毫秒**。 |
-| `randomImage` | `Bool` | 内置 | 是否随机挑选图片。 |
-| `startPosition` | `Point` | 内置 | 起始位置，需同时提供 `x`、`y`。 |
-| `endPosition` | `Point` | 内置 | 结束位置，需同时提供 `x`、`y`。 |
+| `randomImage` | `Bool` | `false` | 是否随机挑选图片。 |
+| `startPosition` | `Point` | `{0, 0}` | 起始位置，相对**按键横向中点、纵向最低点**（底边中点）的偏移，单位为**点**，y 负方向朝上。需同时提供 `x`、`y`。 |
+| `endPosition` | `Point` | `{0, 0}` | 结束位置，相对**按键横向中点、纵向最高点**（顶边中点）的偏移，其余同上。 |
 | `startRandomPosition` | `Point` | 内置 | 起始位置的随机浮动范围，为 `0` 时忽略。 |
 | `endRandomPosition` | `Point` | 内置 | 结束位置的随机浮动范围，为 `0` 时忽略。 |
-| `useOpacity` | `Bool` | 内置 | 是否启用透明度动画。 |
-| `startOpacity` | `Float` | 内置 | 起始透明度。 |
-| `endOpacity` | `Float` | 内置 | 结束透明度。 |
-| `useRotation` | `Bool` | 内置 | 是否启用旋转动画。 |
-| `startAngle` | `Float` | 内置 | 起始角度。 |
-| `endAngle` | `Float` | 内置 | 结束角度。 |
-| `randomAngle` | `Float` | 内置 | 角度随机浮动范围。 |
+| `useOpacity` | `Bool` | `false` | 是否启用透明度动画。 |
+| `startOpacity` | `Float` | `1.0` | 起始透明度。 |
+| `endOpacity` | `Float` | `0.8` | 结束透明度。 |
+| `useRotation` | `Bool` | `false` | 是否启用旋转动画。 |
+| `startAngle` | `Float` | 内置 | 起始角度（度）。 |
+| `endAngle` | `Float` | 内置 | 结束角度（度）。 |
+| `randomAngle` | `Float` | 内置 | 角度随机浮动范围（度）。 |
+
+#### `animationType: transform`
+
+作用于按键**已有的图层**的通用变换：位移 / 缩放（可指定锚点）/ 旋转 / 透明度。
+
+| Key | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `target` | `String` | 整个按键 | 要作用的图层，取值为该按键 `backgroundStyle` / `foregroundStyle` 用到的**样式名**。样式不在该按键中时本次动画跳过。 |
+| `trigger` | 枚举 | `press` | `press` 按下 / `release` 抬起 / `both` 两者。开了 `holdUntilRelease` 时此项失效。 |
+| `holdUntilRelease` | `Bool` | `false` | 按下播到终点**停住**，抬起再反向播回起点。按住期间维持终点状态。 |
+| `duration` | `Float` | `200` | 时长，**毫秒**。 |
+| `releaseDuration` | `Float` | 同 `duration` | `holdUntilRelease` 回程的时长，**毫秒**。 |
+| `delay` | `Float` | `0` | 起播延迟，**毫秒**。 |
+| `timing` | 枚举 \| `[Float]` | `easeInEaseOut` | 枚举：`linear` / `easeIn` / `easeOut` / `easeInEaseOut` / `default`；也可写**四个数**的三次贝塞尔控制点，如 `[0.34, 1.56, 0.64, 1]`（回弹）。 |
+| `repeatCount` | `Int` | `1` | 播放次数，最少 1。 |
+| `autoreverses` | `Bool` | `false` | 播完后反向播回起点。 |
+| `restoreOnFinish` | `Bool` | `true` | 播完恢复原状；`false` 时停在终点。 |
+| `anchorPoint` | `Point` | `{0.5, 0.5}` | 缩放 / 旋转的锚点，**单位坐标**。不改动图层自身的 anchorPoint，不影响布局。 |
+| `positionUnit` | 枚举 | `point` | 位移的单位：`point` 为点；`layer` / `button` 表示按**目标图层** / **整个按键**的宽高取倍数。 |
+| `startPosition` / `endPosition` | `Point` | `{0,0}` | 位移起止值，相对图层原位置，y 负方向朝上。单位由 `positionUnit` 决定。 |
+| `startScale` / `endScale` | `Float` \| `Point` | `1` | 缩放起止倍率。写标量为等比；写 `{ x:, y: }` 可分轴缩放。 |
+| `useRotation` | `Bool` | `false` | 是否启用旋转。 |
+| `startAngle` / `endAngle` | `Float` | `0` | 旋转起止角度（度）。 |
+| `useOpacity` | `Bool` | `false` | 是否启用透明度动画。 |
+| `startOpacity` / `endOpacity` | `Float` | `1` | 透明度起止值。 |
+| `detached` | `Bool` | `false` | 脱离按键播放：复制一份浮到键盘之上，播完删除，原图层期间隐藏。仅对有图片内容的图层有效；`holdUntilRelease` 下不生效。 |
+
+> **`positionUnit` 优先用 `layer` / `button`**。写死点值的位移在改了 `keyboardHeight`
+> 或换了目标机型后就偏了；按图层宽高取倍数则自动跟着缩放。
+> 例：某元素要上浮「按键高度的 16%」，写 `positionUnit: layer` + `endPosition: { x: 0, y: -0.16 }`。
+
+> **`holdUntilRelease` 与 `detached` 是互斥的两种诉求**：
+>
+> - 想让效果**跟着手指**（按住就保持，松手才复原）→ `holdUntilRelease: true`。
+>   按下与抬起各播一程，两程共用一条动画，抬起那程播完会把常驻动画摘干净。
+> - 想让效果**放完自己的一生**（松手也要播完）→ `detached: true`。
+>
+> 按键抬起时图层会按抬起状态重绘，只写了 `highlightImage` 的图层内容会被清空——
+> 「按下弹出个小东西、飘一下再收回」这类动画不脱离就会断在半路。脱离后动画在副本上跑完，
+> 既不受按下 / 抬起状态影响，也不会被按键自身的 `scale` 动画连带缩放。
+>
+> 不设 `target` 时写的是整个按键图层的 `transform`，与 `scale` 动画冲突，
+> 两者别挂在同一个按键上。要「整键缩放 + 某层单独动」时，给 `transform` 加 `target`。
+>
+> **版本要求**：TF >= 442 / 商店 >= 1.6.28。
+> 旧版本识别不了这个 `animationType`，会**整条动画静默不生效**（不报错）。
+
+---
+
+**三种能做「动」的动画怎么选**：
+
+| 想要的效果 | 用哪个 |
+| --- | --- |
+| 整个按键按下时缩一下 | `scale`（最省事） |
+| 按键里**某一层**位移 / 缩放 / 旋转，或需要指定缩放锚点 | `transform` |
+| 冒出**新的图片**（粒子、飘出来的小动物），可随机位置 / 角度 | `physics` |
+| 原地播放一段帧动画 | `cartoon` |
+
+> `physics` 会新建临时图层来播放图片，`transform` 动的是已有图层、不新建图层。
+> 想让一张**按键上本来就有的图**动起来，用 `transform`；想凭空冒出一张图，用 `physics`：
+>
+> ```yaml
+> splash:
+>   animationType: physics
+>   duration: 200
+>   images: ["cow.png"]
+>   targetScale: 0.4
+>   startPosition: { x: 0, y: -39 }   # 底边中点往上 39pt
+>   endPosition:   { x: 0, y: 7 }     # 顶边中点往下 7pt
+>   useOpacity: true
+>   startOpacity: 1.0
+>   endOpacity: 0.0
+> ```
+>
+> 缺点是没有缩放曲线——只有一个固定的 `targetScale`，做不出「边飘边变大」。
+> 要「边飘边变大」且那张图是按键上已有的图层，用 `transform`（同时给
+> `endPosition` 和 `endScale`）；若是凭空冒出来的图，只能改用 `cartoon` 预先生成几帧。
 
 ### 4.10 候选字长按菜单 `candidateContextMenu`
 

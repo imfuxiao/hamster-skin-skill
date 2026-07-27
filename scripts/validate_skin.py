@@ -105,7 +105,10 @@ FONT_WEIGHTS = [
 ]
 NOTIFICATION_TYPES = ["rime", "keyboardAction", "returnKeyType", "preeditChanged"]
 RIME_NOTIFICATION_TYPES = ["optionChanged", "schemaChanged"]
-ANIMATION_TYPES = ["scale", "cartoon", "physics"]
+ANIMATION_TYPES = ["scale", "cartoon", "physics", "transform"]
+ANIMATION_TRIGGERS = ["press", "release", "both"]
+TIMING_FUNCTIONS = ["linear", "easeIn", "easeOut", "easeInEaseOut", "default"]
+POSITION_UNITS = ["point", "layer", "button"]
 
 # 根节点中的结构性 Key（其余值为映射的根 Key 都是样式名）
 STRUCTURAL_KEYS = [
@@ -657,7 +660,7 @@ class SkinValidator(object):
         self.validate_button_style_type(where, node, is_preedit_fg)
         self.validate_colors(where, node)
         self.validate_notification(where, node)
-        self.validate_animation(where, node)
+        self.validate_animation(where, node, referenced)
         self.validate_hint_symbols(where, node)
 
         for k in ACTION_KEYS:
@@ -769,7 +772,7 @@ class SkinValidator(object):
         if node.get("backgroundStyle") is None and node.get("foregroundStyle") is None:
             self.r.warn(where, "通知节点没有定义任何样式，命中后按键会显示为空白")
 
-    def validate_animation(self, where, node):
+    def validate_animation(self, where, node, referenced):
         t = node.get("animationType")
         if t is None:
             return
@@ -782,6 +785,63 @@ class SkinValidator(object):
                 "%s/zPosition" % where,
                 "值 `%s` 无效，应为 above 或 below" % node["zPosition"],
             )
+        if t == "transform":
+            self.validate_enum(where, node, "trigger", ANIMATION_TRIGGERS)
+            self.validate_enum(where, node, "positionUnit", POSITION_UNITS)
+            # timing 既可以是预设枚举，也可以是四个数的三次贝塞尔控制点
+            timing = node.get("timing")
+            if isinstance(timing, list):
+                if len(timing) != 4 or not all(
+                    isinstance(v, (int, float)) for v in timing
+                ):
+                    self.r.error(
+                        "%s/timing" % where,
+                        "写成数组时必须是 4 个数的三次贝塞尔控制点，如 [0.34, 1.56, 0.64, 1]",
+                    )
+            elif timing is not None:
+                self.validate_enum(where, node, "timing", TIMING_FUNCTIONS)
+            # target 指向按键内的某个样式名，样式必须存在
+            target = node.get("target")
+            if isinstance(target, str):
+                referenced.add(target)
+            moved = any(
+                node.get(k) is not None
+                for k in ("startPosition", "endPosition", "startScale", "endScale")
+            )
+            if not moved and not node.get("useOpacity") and not node.get("useRotation"):
+                self.r.warn(
+                    where,
+                    "transform 动画没有设置任何位移 / 缩放 / 旋转 / 透明度，不会有可见效果",
+                )
+            if node.get("detached") and not node.get("target"):
+                self.r.warn(
+                    where, "transform 用了 detached 但没有 target，会把整个按键复制一份浮起来"
+                )
+            if node.get("holdUntilRelease"):
+                for key in ("trigger", "detached"):
+                    if node.get(key) is not None:
+                        self.r.warn(
+                            "%s/%s" % (where, key),
+                            "holdUntilRelease 开启时该项不生效（按下与抬起都要处理）",
+                        )
+            for key in ("startScale", "endScale"):
+                v = node.get(key)
+                if v is None:
+                    continue
+                if isinstance(v, dict):          # { x: , y: } 分轴缩放
+                    bad = [
+                        k
+                        for k in ("x", "y")
+                        if k in v and (not isinstance(v[k], (int, float)) or v[k] <= 0)
+                    ]
+                    if bad:
+                        self.r.error(
+                            "%s/%s" % (where, key), "x / y 必须是大于 0 的数值"
+                        )
+                elif not isinstance(v, (int, float)) or v <= 0:
+                    self.r.error(
+                        "%s/%s" % (where, key), "必须是大于 0 的数值，或 { x:, y: }"
+                    )
 
     def validate_hint_symbols(self, where, node):
         if "symbolStyles" in node:
