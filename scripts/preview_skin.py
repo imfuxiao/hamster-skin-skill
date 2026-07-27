@@ -150,11 +150,23 @@ class Renderer:
         if not isinstance(st, dict):
             self.missing.append(name)
             return
-        x, y, w, h = rect
+        vx, vy, vw, vh = rect                       # 可视区域，center 以它为基准
         l, t, r, b = insets_of(st.get("insets"))
-        x, y, w, h = x + l, y + t, w - l - r, h - t - b
+        x, y, w, h = vx + l, vy + t, vw - l - r, vh - t - b
         if w <= 0 or h <= 0:
             return
+        # center：把图层中心挪到「可视区域宽 x center.x + 可视区域 minX」
+        ctr = st.get("center")
+        if isinstance(ctr, dict):
+            if ctr.get("x") is not None:
+                x = vx + vw * float(ctr["x"]) - w / 2.0
+            if ctr.get("y") is not None:
+                y = vy + vh * float(ctr["y"]) - h / 2.0
+        # offset：在此基础上再平移（点）
+        off = st.get("offset")
+        if isinstance(off, dict):
+            x += float(off.get("x") or 0)
+            y += float(off.get("y") or 0)
         typ = st.get("buttonStyleType")
         if typ == "fileImage":
             self._file_image(canvas, st, (x, y, w, h), pressed)

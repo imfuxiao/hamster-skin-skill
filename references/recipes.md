@@ -402,9 +402,80 @@ verticalBackspaceButton:
   foregroundStyle: backspaceFg              # delete.left
 ```
 
-键帽用位图的皮肤，这四个键也要用同一套键帽图，否则展开后风格断层。
-一行四个键在 390pt 屏上每个约 97.5pt 宽，**按键帽切片的原始比例反推行高**
-（`97.5 × 切片高 / 切片宽`）就不会把键帽压扁。
+键帽与图标**全部从源皮肤里取**，别用 `geometry` 另画、也别用 SF Symbols 或自己打的文字顶替——
+这一行的素材源皮肤基本都齐，找不到多半是没找对地方。
+
+```yaml
+verticalPageUpButton:
+  action: { shortcut: "#verticalCandidatesPageUp" }
+  backgroundStyle: verticalKeycapStyle          # 宽键帽，铺满格子
+  foregroundStyle: verticalPageUpButtonIcon
+verticalPageUpButtonIcon:
+  buttonStyleType: fileImage
+  contentMode: center                           # ← 关键：原始尺寸居中，不缩放
+  normalImage:    { file: sym, image: k2 }
+  highlightImage: { file: symax, image: k2 }
+verticalKeycapStyle:
+  buttonStyleType: fileImage
+  normalImage:    { file: anjian123, image: k16 }
+  highlightImage: { file: anjian123ax, image: k16 }
+```
+
+- **图标一律 `contentMode: center`。** 源皮肤的图标切片本来就是照着按键尺寸画的，
+  原样居中画出来就是对的。这时 `rect` **直接用 `.til` 的 `SOURCE_RECT`，不要收紧**——
+  切片四周的透明留白会被可视区裁掉，不参与缩放，收紧了反而要另外算 `insets`。
+  （收紧 `rect` 那套只在 `scaleAspectFit` 下才需要，见上面的「皮肤图片」。）
+
+  > `contentMode: center` 下 **1 图片像素约合 1/3 点**（3x 设备按图片自身 scale 折算），
+  > 所以 110x80 的切片画出来约 37x27pt，正好是一颗键的大小——这也是为什么源切片能原样用。
+
+- **一颗键上要摆多个图标时，用 `center: { x, y }`（可视区域的分数）定位，别用
+  `insets` 或 `offset`。** `insets` 是「缩进 + 缩放」，会连尺寸一起改；`offset` 是点值，
+  换机型就偏。`center` 是纯比例，天然跨设备：
+
+  ```yaml
+  # 退格键：「删除」角标 + 箭头两层，都取自 more.png
+  verticalBackspaceButton:
+    foregroundStyle: [verticalBackspaceDeleteLabel, verticalBackspaceArrow]
+  verticalBackspaceDeleteLabel:
+    buttonStyleType: fileImage
+    contentMode: center
+    center: { x: 0.293, y: 0.5 }      # 角标偏左
+    normalImage: { file: more, image: k32 }
+  verticalBackspaceArrow:
+    buttonStyleType: fileImage
+    contentMode: center               # 不写 center 即居中
+    normalImage: { file: more, image: k2 }
+  ```
+
+  分数怎么算：源皮肤 `[KEY*]` 的 `POS_TYPE` 指向 `gen.ini` 的 `[OFFSET*]`，
+  拿到 `POS=(dx,dy)`（**源像素**），换算成 `center.x = 0.5 + dx / 3 / 格子宽`。
+  上例的角标 `POS=(-65,0)`，格子宽 104.5pt → `0.5 - 65/3/104.5 = 0.293`。
+- **键帽挑源皮肤里的「宽功能键」片**，不要挑字母键。这一行的格子是扁的
+  （约 105x48，纵横比 2.2），字母键帽是竖的（106x151，纵横比 0.70），铺进去圆角会被拉成椭圆；
+  数字面板的拼合图（百度皮肤是 `anjian123.png`）里有 240x151 的宽键帽，铺进去就自然多了。
+  九宫格保护区**救不了**这件事：键帽圆角半径 27~32px，要完整包住得 ~39px 保护区，
+  上下加起来 78pt 已超过 48pt 的行高，圆弧下半截照样被压扁，还会挤出两片「翅膀」。
+- **图标在哪找**（百度皮肤的常见排布）：
+
+  | 图标 | 拼合图 | 片号 |
+  | --- | --- | --- |
+  | ∧ 上一页 | `sym.png` / `symax.png` | `IMG2` |
+  | ∨ 下一页 | 同上 | `IMG3` |
+  | 「返回」 | 同上 | `IMG1`（有的皮肤在 `letter*.png` 里） |
+  | ← 删除箭头 | `more.png` / `moreax.png` | `IMG2` |
+
+- **退格：与主键盘上那颗退格键用同一套样式**（键帽片 + 预合成的前景，含「删除」字样与箭头）。
+  它比另外三个更方，用 `bounds` 把绘制区锁回原键的宽高比就不会变形：
+
+  ```yaml
+  verticalBackspaceButton:
+    bounds: { width: 55 }        # 48pt 行高 x (165/143)，165x143 是原键的 viewRect
+    backgroundStyle: verticalBackspaceKeycapStyle   # 与主键盘退格键同一片键帽
+    foregroundStyle: verticalBackspaceLabel         # 同一片预合成前景
+  ```
+
+  这样退格会比另外三个窄一圈——原皮肤本来就是这个比例，看着是对的。
 
 ### 符号列表 + 自定义数据源
 

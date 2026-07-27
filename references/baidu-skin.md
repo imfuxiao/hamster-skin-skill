@@ -531,7 +531,7 @@ colRight: { size: { width: 174/1098 } }
 | 百度 | 元书 |
 | --- | --- |
 | `CENTER=<字母>` | `action: { character: x }` |
-| `CENTER=<标点>` | `action: { symbol: "，" }`（`symbol` 直接上屏；`character` 会喂给 RIME） |
+| `CENTER=<标点>` | `action: { character: "<对应的英文标点>" }`（`symbol` 会直接上屏；`character` 会喂给 RIME） |
 | `CENTER=F36` | `action: backspace`（另加 `repeatAction: backspace`） |
 | `CENTER=F38` / `F39` | `action: space` / `enter` |
 | `CENTER=F1` / `F6` / `F7` | `{ keyboardType: symbolic }` / `{ keyboardType: numeric }` / `{ keyboardType: emojis }` |
