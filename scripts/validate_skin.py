@@ -87,21 +87,43 @@ def load_yaml(path):
 BUTTON_STYLE_TYPES = ["geometry", "systemImage", "assetImage", "fileImage", "text"]
 
 CELL_TYPES = [
-    "button", "symbols", "classifiedSymbols", "subClassifiedSymbols",
-    "horizontalSymbols", "horizontalCandidates", "verticalCandidates",
-    "numericSymbols", "categorySymbols", "t9Symbols", "t9HorizontalSymbols",
+    "button",
+    "symbols",
+    "classifiedSymbols",
+    "subClassifiedSymbols",
+    "horizontalSymbols",
+    "horizontalCandidates",
+    "verticalCandidates",
+    "numericSymbols",
+    "categorySymbols",
+    "t9Symbols",
+    "t9HorizontalSymbols",
 ]
 
 ALIGNMENTS = [
-    "leftTop", "left", "leftBottom", "centerTop", "center", "centerBottom",
-    "rightTop", "right", "rightBottom",
+    "leftTop",
+    "left",
+    "leftBottom",
+    "centerTop",
+    "center",
+    "centerBottom",
+    "rightTop",
+    "right",
+    "rightBottom",
 ]
 
 CONTENT_MODES = ["scaleToFill", "scaleAspectFit", "scaleAspectFill", "center"]
 GRADIENT_TYPES = ["axial", "conic", "radial"]
 FONT_WEIGHTS = [
-    "ultraLight", "thin", "light", "regular", "medium",
-    "semibold", "bold", "heavy", "black",
+    "ultraLight",
+    "thin",
+    "light",
+    "regular",
+    "medium",
+    "semibold",
+    "bold",
+    "heavy",
+    "black",
 ]
 NOTIFICATION_TYPES = ["rime", "keyboardAction", "returnKeyType", "preeditChanged"]
 RIME_NOTIFICATION_TYPES = ["optionChanged", "schemaChanged"]
@@ -112,66 +134,151 @@ POSITION_UNITS = ["point", "layer", "button"]
 
 # 根节点中的结构性 Key（其余值为映射的根 Key 都是样式名）
 STRUCTURAL_KEYS = [
-    "preeditHeight", "toolbarHeight", "keyboardHeight",
-    "preeditStyle", "toolbarStyle", "toolbarLayout",
-    "keyboardStyle", "keyboardLayout",
-    "horizontalCandidatesStyle", "horizontalCandidatesLayout",
-    "verticalCandidatesStyle", "verticalCandidatesLayout",
+    "preeditHeight",
+    "toolbarHeight",
+    "keyboardHeight",
+    "preeditStyle",
+    "toolbarStyle",
+    "toolbarLayout",
+    "keyboardStyle",
+    "keyboardLayout",
+    "horizontalCandidatesStyle",
+    "horizontalCandidatesLayout",
+    "verticalCandidatesStyle",
+    "verticalCandidatesLayout",
     "candidateContextMenu",
-    "floatTargetScale", "floatKeyboardAlpha", "floatKeyboardLockedState",
+    "floatTargetScale",
+    "floatKeyboardAlpha",
+    "floatKeyboardLockedState",
 ]
 
 LAYOUT_KEYS = [
-    "toolbarLayout", "keyboardLayout",
-    "horizontalCandidatesLayout", "verticalCandidatesLayout",
+    "toolbarLayout",
+    "keyboardLayout",
+    "horizontalCandidatesLayout",
+    "verticalCandidatesLayout",
 ]
 
 # 值为「样式名 / 样式名数组 / 条件样式数组」的 Key —— 需要检查引用是否存在
 STYLE_REF_KEYS = [
-    "backgroundStyle", "foregroundStyle",
-    "uppercasedStateForegroundStyle", "capsLockedStateForegroundStyle",
-    "swipeUpForegroundStyle", "swipeDownForegroundStyle",
-    "hintStyle", "hintSymbolsStyle", "hintSymbolsGridStyle",
-    "selectedBackgroundStyle", "cellStyle", "candidateStyle", "selectedStyle",
-    "animation", "notification", "symbolStyles",
+    "backgroundStyle",
+    "foregroundStyle",
+    "uppercasedStateForegroundStyle",
+    "capsLockedStateForegroundStyle",
+    "swipeUpForegroundStyle",
+    "swipeDownForegroundStyle",
+    "hintStyle",
+    "hintSymbolsStyle",
+    "hintSymbolsGridStyle",
+    "selectedBackgroundStyle",
+    "cellStyle",
+    "candidateStyle",
+    "selectedStyle",
+    "animation",
+    "notification",
+    "symbolStyles",
 ]
 
 ACTION_KEYS = [
-    "action", "uppercasedStateAction", "preeditStateAction", "repeatAction",
-    "swipeUpAction", "swipeDownAction", "notificationKeyboardAction",
+    "action",
+    "uppercasedStateAction",
+    "preeditStateAction",
+    "repeatAction",
+    "swipeUpAction",
+    "swipeDownAction",
+    "notificationKeyboardAction",
 ]
 
 SHORTCUTS = [
-    "#简繁切换", "#中英切换", "#RimeSwitcher", "#次选上屏", "#三选上屏", "#方案切换",
-    "#行首", "#行尾", "#换行", "#Enter", "#重输", "#左手模式", "#右手模式",
-    "#cut", "#copy", "#paste",
-    "#subCollectionPageUp", "#subCollectionPageDown",
-    "#verticalCandidatesPageUp", "#verticalCandidatesPageDown",
-    "#showPhraseView", "#showPasteboardView", "#toggleScriptView",
-    "#candidatesBarStateToggle", "#rimePreviousPage", "#rimeNextPage",
-    "#toggleEmbeddedInputMode", "#keyboardPerformance", "#keyboardMenu",
+    "#简繁切换",
+    "#中英切换",
+    "#RimeSwitcher",
+    "#次选上屏",
+    "#三选上屏",
+    "#方案切换",
+    "#行首",
+    "#行尾",
+    "#换行",
+    "#Enter",
+    "#重输",
+    "#左手模式",
+    "#右手模式",
+    "#cut",
+    "#copy",
+    "#paste",
+    "#selectText",
+    "#deleteText",
+    "#undo",
+    "#redo",
+    "#subCollectionPageUp",
+    "#subCollectionPageDown",
+    "#verticalCandidatesPageUp",
+    "#verticalCandidatesPageDown",
+    "#showPhraseView",
+    "#showPasteboardView",
+    "#toggleScriptView",
+    "#candidatesBarStateToggle",
+    "#rimePreviousPage",
+    "#rimeNextPage",
+    "#toggleEmbeddedInputMode",
+    "#keyboardPerformance",
+    "#keyboardMenu",
     "#clearSystemPasteboard",
 ]
 
 ACTION_SCALARS = [
-    "backspace", "command", "control", "dictation", "dismissKeyboard", "escape",
-    "function", "moveCursorBackward", "moveCursorForward", "nextKeyboard",
-    "option", "settings", "space", "systemSettings", "tab", "shift", "enter",
-    "returnPrimaryKeyboard", "returnLastKeyboard",
-    "symbolicKeyboardLockStateToggle", "none",
+    "backspace",
+    "command",
+    "control",
+    "dictation",
+    "dismissKeyboard",
+    "escape",
+    "function",
+    "moveCursorBackward",
+    "moveCursorForward",
+    "nextKeyboard",
+    "option",
+    "settings",
+    "space",
+    "systemSettings",
+    "tab",
+    "shift",
+    "enter",
+    "returnPrimaryKeyboard",
+    "returnLastKeyboard",
+    "symbolicKeyboardLockStateToggle",
+    "none",
 ]
 
 ACTION_OBJECT_KEYS = [
-    "combine", "character", "symbol", "shortcutCommand", "shortcut",
-    "floatKeyboardType", "sendKeys", "openURL", "runScript", "openScript",
-    "keyboardType", "switchRimeSchema",
+    "combine",
+    "character",
+    "symbol",
+    "shortcutCommand",
+    "shortcut",
+    "floatKeyboardType",
+    "sendKeys",
+    "openURL",
+    "runScript",
+    "openScript",
+    "keyboardType",
+    "switchRimeSchema",
 ]
 
 # 只在本层查找、不会穿透 YAML 合并键 `<<` 的 Key
 NO_MERGE_KEYS = [
-    "maxColumns", "maxRows", "contentRightToLeft", "colorLocation",
-    "colorStartPoint", "colorEndPoint", "colorGradientType", "shadowOpacity",
-    "type", "floatKeyboardAlpha", "floatKeyboardLockedState", "floatTargetScale",
+    "maxColumns",
+    "maxRows",
+    "contentRightToLeft",
+    "colorLocation",
+    "colorStartPoint",
+    "colorEndPoint",
+    "colorGradientType",
+    "shadowOpacity",
+    "type",
+    "floatKeyboardAlpha",
+    "floatKeyboardLockedState",
+    "floatTargetScale",
 ]
 
 CONFIG_META_KEYS = ["name", "author", "fontFace", "keySound"]
@@ -180,6 +287,7 @@ COLOR_RE = re.compile(r"\A#?(?:[0-9a-fA-F]{6}|[0-9a-fA-F]{8})\Z")
 
 
 # ---------------------------------------------------------------- 报告
+
 
 class Report(object):
     def __init__(self):
@@ -204,10 +312,14 @@ class Report(object):
         if not self.errors and not self.warnings:
             print("\n通过：未发现问题。")
         else:
-            print("\n合计：%d 个错误，%d 个警告。" % (len(self.errors), len(self.warnings)))
+            print(
+                "\n合计：%d 个错误，%d 个警告。"
+                % (len(self.errors), len(self.warnings))
+            )
 
 
 # ---------------------------------------------------------------- 工具
+
 
 def as_list(v):
     if v is None:
@@ -261,20 +373,23 @@ def scan_merge_traps(path):
         anchor = m.group(1)
         base_indent = len(line) - len(line.lstrip())
         block = [line]
-        for nxt in lines[idx + 1:]:
+        for nxt in lines[idx + 1 :]:
             if not nxt.strip():
                 continue
             if len(nxt) - len(nxt.lstrip()) <= base_indent:
                 break
             block.append(nxt)
         text = "\n".join(block)
-        found = [k for k in NO_MERGE_KEYS if re.search(r"(?<![A-Za-z])%s\s*:" % k, text)]
+        found = [
+            k for k in NO_MERGE_KEYS if re.search(r"(?<![A-Za-z])%s\s*:" % k, text)
+        ]
         if found:
             hits.append((anchor, found))
     return hits
 
 
 # ---------------------------------------------------------------- 校验器
+
 
 class SkinValidator(object):
     def __init__(self, root, report):
@@ -305,9 +420,7 @@ class SkinValidator(object):
     # -------------------------------------------------------- config.yaml
 
     def validate_config(self, config):
-        kb_types = dict(
-            (k, v) for k, v in config.items() if k not in CONFIG_META_KEYS
-        )
+        kb_types = dict((k, v) for k, v in config.items() if k not in CONFIG_META_KEYS)
 
         if not kb_types:
             self.r.error("config.yaml", "没有声明任何键盘类型")
@@ -338,7 +451,8 @@ class SkinValidator(object):
                 for o in orientations:
                     if o not in valid:
                         self.r.warn(
-                            dwhere, "未知方向键 `%s`（应为 %s）" % (o, " / ".join(valid))
+                            dwhere,
+                            "未知方向键 `%s`（应为 %s）" % (o, " / ".join(valid)),
                         )
                 for o in ("portrait", "landscape"):
                     if not orientations.get(o):
@@ -467,7 +581,8 @@ class SkinValidator(object):
         candidate_keys = [k for k in node if k not in STRUCTURAL_KEYS]
         style_names = set(k for k in candidate_keys if isinstance(node[k], dict))
         stray = [
-            k for k in candidate_keys
+            k
+            for k in candidate_keys
             if not isinstance(node[k], dict) and k not in self.data_sources
         ]
         if stray:
@@ -501,8 +616,11 @@ class SkinValidator(object):
                 self.validate_layout("%s/%s" % (rel, lk), node[lk], referenced)
 
         for k in (
-            "preeditStyle", "toolbarStyle", "keyboardStyle",
-            "horizontalCandidatesStyle", "verticalCandidatesStyle",
+            "preeditStyle",
+            "toolbarStyle",
+            "keyboardStyle",
+            "horizontalCandidatesStyle",
+            "verticalCandidatesStyle",
         ):
             if node.get(k):
                 self.collect_refs(node[k], referenced)
@@ -529,7 +647,9 @@ class SkinValidator(object):
 
         for name in sorted(self.data_sources):
             if name not in node:
-                self.r.error(rel, "dataSource `%s` 在根节点不存在（符号列表会是空的）" % name)
+                self.r.error(
+                    rel, "dataSource `%s` 在根节点不存在（符号列表会是空的）" % name
+                )
             elif not isinstance(node[name], list):
                 self.r.error(rel, "dataSource `%s` 必须是数组" % name)
 
@@ -537,7 +657,9 @@ class SkinValidator(object):
         if unused:
             shown = ", ".join(sorted(unused)[:8])
             more = " …" if len(unused) > 8 else ""
-            self.r.warn(rel, "有 %d 个样式从未被引用：%s%s" % (len(unused), shown, more))
+            self.r.warn(
+                rel, "有 %d 个样式从未被引用：%s%s" % (len(unused), shown, more)
+            )
 
         for anchor, keys in scan_merge_traps(path):
             self.r.warn(
@@ -648,9 +770,7 @@ class SkinValidator(object):
         self.validate_enum(where, node, "colorGradientType", GRADIENT_TYPES)
         self.validate_enum(where, node, "fontWeight", FONT_WEIGHTS)
         self.validate_enum(where, node, "notificationType", NOTIFICATION_TYPES)
-        self.validate_enum(
-            where, node, "rimeNotificationType", RIME_NOTIFICATION_TYPES
-        )
+        self.validate_enum(where, node, "rimeNotificationType", RIME_NOTIFICATION_TYPES)
         self.validate_enum(where, node, "animationType", ANIMATION_TYPES)
         if isinstance(node.get("bounds"), dict):
             self.validate_enum(
@@ -668,9 +788,7 @@ class SkinValidator(object):
                 self.validate_action("%s/%s" % (where, k), node[k])
 
         if "animation" in node and not isinstance(node["animation"], list):
-            self.r.error(
-                "%s/animation" % where, "必须是数组，写成单个字符串不会生效"
-            )
+            self.r.error("%s/animation" % where, "必须是数组，写成单个字符串不会生效")
 
     def validate_enum(self, where, node, key, allowed):
         if key not in node:
@@ -691,34 +809,47 @@ class SkinValidator(object):
 
         if t == "systemImage":
             if not node.get("systemImageName"):
-                self.r.error(where, "buttonStyleType 为 systemImage，但缺少 systemImageName")
+                self.r.error(
+                    where, "buttonStyleType 为 systemImage，但缺少 systemImageName"
+                )
         elif t == "assetImage":
             if not node.get("assetImageName"):
-                self.r.error(where, "buttonStyleType 为 assetImage，但缺少 assetImageName")
+                self.r.error(
+                    where, "buttonStyleType 为 assetImage，但缺少 assetImageName"
+                )
         elif t == "fileImage":
             if node.get("normalImage") is None and node.get("highlightImage") is None:
                 self.r.error(
-                    where, "buttonStyleType 为 fileImage，但既没有 normalImage 也没有 highlightImage"
+                    where,
+                    "buttonStyleType 为 fileImage，但既没有 normalImage 也没有 highlightImage",
                 )
             for k in ("normalImage", "highlightImage"):
                 img = node.get(k)
                 if img is None:
                     continue
-                if not isinstance(img, dict) or not img.get("file") or not img.get("image"):
+                if (
+                    not isinstance(img, dict)
+                    or not img.get("file")
+                    or not img.get("image")
+                ):
                     self.r.error(
-                        "%s/%s" % (where, k), "fileImage 需要同时提供 file 与 image 两个子 Key"
+                        "%s/%s" % (where, k),
+                        "fileImage 需要同时提供 file 与 image 两个子 Key",
                     )
         elif t == "text":
             if "text" not in node and not is_preedit_fg:
                 self.r.warn(
-                    where, "buttonStyleType 为 text，但没有 text，按键上不会显示任何文字"
+                    where,
+                    "buttonStyleType 为 text，但没有 text，按键上不会显示任何文字",
                 )
 
     def validate_colors(self, where, node):
         for k, v in node.items():
             if not isinstance(k, str):
                 continue
-            if not (k.lower().endswith("color") or k in ("normalColor", "highlightColor")):
+            if not (
+                k.lower().endswith("color") or k in ("normalColor", "highlightColor")
+            ):
                 continue
             for c in as_list(v):
                 if not isinstance(c, str):
@@ -737,18 +868,25 @@ class SkinValidator(object):
         if t == "rime":
             rt = node.get("rimeNotificationType")
             if rt is None:
-                self.r.error(where, "notificationType 为 rime，但缺少 rimeNotificationType")
+                self.r.error(
+                    where, "notificationType 为 rime，但缺少 rimeNotificationType"
+                )
             elif rt == "optionChanged":
                 if not node.get("rimeOptionName"):
                     self.r.error(
-                        where, "rimeNotificationType 为 optionChanged，但缺少 rimeOptionName"
+                        where,
+                        "rimeNotificationType 为 optionChanged，但缺少 rimeOptionName",
                     )
                 if "rimeOptionValue" not in node:
                     self.r.error(
-                        where, "rimeNotificationType 为 optionChanged，但缺少 rimeOptionValue"
+                        where,
+                        "rimeNotificationType 为 optionChanged，但缺少 rimeOptionValue",
                     )
             elif rt == "schemaChanged":
-                if node.get("rimeSchemaID") is None and node.get("rimeSchemaName") is None:
+                if (
+                    node.get("rimeSchemaID") is None
+                    and node.get("rimeSchemaName") is None
+                ):
                     self.r.error(
                         where,
                         "rimeNotificationType 为 schemaChanged，但 rimeSchemaID 与 rimeSchemaName 都没有提供",
@@ -756,18 +894,19 @@ class SkinValidator(object):
         elif t == "keyboardAction":
             if not node.get("notificationKeyboardAction"):
                 self.r.error(
-                    where, "notificationType 为 keyboardAction，但缺少 notificationKeyboardAction"
+                    where,
+                    "notificationType 为 keyboardAction，但缺少 notificationKeyboardAction",
                 )
         elif t == "returnKeyType":
             rk = node.get("returnKeyType")
             if rk is None:
-                self.r.error(where, "notificationType 为 returnKeyType，但缺少 returnKeyType")
+                self.r.error(
+                    where, "notificationType 为 returnKeyType，但缺少 returnKeyType"
+                )
             elif not isinstance(rk, list) or any(
                 not isinstance(x, int) or isinstance(x, bool) for x in rk
             ):
-                self.r.error(
-                    "%s/returnKeyType" % where, "必须是整数数组，如 [1, 4, 7]"
-                )
+                self.r.error("%s/returnKeyType" % where, "必须是整数数组，如 [1, 4, 7]")
 
         if node.get("backgroundStyle") is None and node.get("foregroundStyle") is None:
             self.r.warn(where, "通知节点没有定义任何样式，命中后按键会显示为空白")
@@ -779,7 +918,9 @@ class SkinValidator(object):
         if t in ("cartoon", "physics"):
             imgs = node.get("images")
             if not isinstance(imgs, list) or not imgs:
-                self.r.error(where, "animationType 为 %s，但 images 为空，动画不会播放" % t)
+                self.r.error(
+                    where, "animationType 为 %s，但 images 为空，动画不会播放" % t
+                )
         if "zPosition" in node and str(node["zPosition"]) not in ("above", "below"):
             self.r.error(
                 "%s/zPosition" % where,
@@ -815,7 +956,8 @@ class SkinValidator(object):
                 )
             if node.get("detached") and not node.get("target"):
                 self.r.warn(
-                    where, "transform 用了 detached 但没有 target，会把整个按键复制一份浮起来"
+                    where,
+                    "transform 用了 detached 但没有 target，会把整个按键复制一份浮起来",
                 )
             if node.get("holdUntilRelease"):
                 for key in ("trigger", "detached"):
@@ -828,7 +970,7 @@ class SkinValidator(object):
                 v = node.get(key)
                 if v is None:
                     continue
-                if isinstance(v, dict):          # { x: , y: } 分轴缩放
+                if isinstance(v, dict):  # { x: , y: } 分轴缩放
                     bad = [
                         k
                         for k in ("x", "y")
@@ -848,7 +990,8 @@ class SkinValidator(object):
             v = node["symbolStyles"]
             if not isinstance(v, list) or not v:
                 self.r.error(
-                    "%s/symbolStyles" % where, "必须是非空数组，否则长按符号面板不会显示"
+                    "%s/symbolStyles" % where,
+                    "必须是非空数组，否则长按符号面板不会显示",
                 )
         for k in ("anchor", "selected"):
             if k not in node:
@@ -903,6 +1046,7 @@ class SkinValidator(object):
 
 
 # ---------------------------------------------------------------- 入口
+
 
 def main(argv):
     if len(argv) < 2 or not argv[1]:
