@@ -1,6 +1,6 @@
 # hamster-skin-skill
 
-用一句话描述，让 AI 帮你做一套[元书输入法](https://github.com/imfuxiao/Hamster3)的键盘皮肤。
+用一句话描述，让 AI 帮你做一套元书输入法的键盘皮肤。
 
 这是一个 [Claude Code](https://claude.com/claude-code) Skill。装好之后，你只需要说
 「帮我做一个莫兰迪色系的键盘皮肤」，它会产出一个可以直接装进 iPhone 的 `.cskin` 文件。
