@@ -211,6 +211,12 @@ POS=0,0                      ; 子图片相对父图片的位置
 
 > `.til` 与元书 `resources/<图片名>.yaml` 几乎一一对应：
 > `SOURCE_RECT` → `rect`，`INNER_RECT` 换算成四边边距 → `insets`。
+>
+> **但图标类切片不能照抄 `SOURCE_RECT`**：它常常四周留着大片透明空白
+> （`cand.png` 里 `130x130` 的片子，图形只占中间 `14x39`）。铺满型图层用
+> `scaleToFill` 无所谓，可**工具栏 / 候选栏那几个 `scaleAspectFit` 的图标**会被整片空白
+> 一起缩进去，真机上只剩一条一两个点宽的丝，看着就是「图没画出来」。
+> 这类切片要按实际像素包围盒把 `rect` 收紧，做法见 `recipes.md` 的「皮肤图片」。
 
 ## 4. `.css` 样式表
 
@@ -262,6 +268,27 @@ PRESS_SOUND_PATH=a_aj.aiff   ; [实测] 按键音文件
 `ANCHOR_TYPE` 取 1–9，对应矩形的九个点：`1` 左上 `2` 中上 `3` 右上 `4` 左中 `5` 中间
 `6` 右中 `7` 左下 `8` 中下 `9` 右下。
 `PERSIST`：`1` 无候选字时显示（推荐默认）`2` 有候选字时显示 `3` 都显示 `0` 都不显示。
+
+### `.cnd` 的 `[ICON*]` 搬到元书的哪里
+
+**按 `KEY=` 认图标，不要按图标画的是什么去猜。** 同一张 `.cnd` 里常有两三个长得几乎一样的
+「⌄」，靠外观分不出谁是谁；`KEY=` 才是唯一可靠的判据。
+
+| `[ICON*]` 的 `KEY` | 含义 | 元书放哪 | 动作 |
+| --- | --- | --- | --- |
+| `F31` | logo / 菜单 | `toolbarLayout` 最左 | `{ shortcut: "#keyboardMenu" }` |
+| `F8` | 隐藏面板 | `toolbarLayout` 最右 | `dismissKeyboard` |
+| **`F9`** | **查看更多候选字**（通常 `PERSIST=2`，有候选字才显示） | **`horizontalCandidatesLayout` 末尾的展开键** | `{ shortcut: "#candidatesBarStateToggle" }` |
+| `F14` | 面板切换容器 | 多半没有 `FORE_STYLE`，是块透明热区 —— 丢弃 |  |
+
+> **不要拿元书的语义习惯去替换源皮肤的图标。**
+> 元书的展开键是「向下展开候选面板」，直觉上想配一个 `⌄`；但源皮肤给 `F9` 配的往往是
+> 右向的 `)` / `›`（百度的「更多 →」是横向展开）。**照搬 `F9` 那一片**——
+> 用户要的是原皮肤那个图标，换成自认为更贴切的另一片就是错的。
+> 真觉得不合适，做完先问，别直接换。
+>
+> `[ICON*]` 带 `STAT_STYLE` 时会在某些状态下换片（例：`F9` 在联想态换成 `F8` 的 `⌄`），
+> 元书没有对应机制，**只取常态那一片**。
 
 `.pop` 的段：
 
@@ -515,6 +542,7 @@ colRight: { size: { width: 174/1098 } }
 | `CENTER=F42` / `F43` | `{ shortcut: "#行首" }` / `{ shortcut: "#行尾" }` |
 | `CENTER=F44/45/46` | `#cut` / `#copy` / `#paste` |
 | `CENTER=F51/F52` | `moveCursorBackward` / `moveCursorForward` |
+| `CENTER=F9` | `{ shortcut: "#candidatesBarStateToggle" }`（多半出现在 `.cnd` 的 `[ICON*]` 里，见第 5 节） |
 | `CENTER=F62` | `nextKeyboard` |
 | `CENTER=F3` | 26 键 ↔ 九宫格：在 `config.yaml` 加自定义键盘类型，`action: { keyboardType: <名字> }` |
 | `UP=<符号>` | `swipeUpAction: { symbol: "…" }`（**别用 `character`**，否则会喂给 RIME） |

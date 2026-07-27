@@ -183,9 +183,30 @@ class Renderer:
         im = sheet.crop((rc["x"], rc["y"], rc["x"] + rc["width"], rc["y"] + rc["height"]))
         x, y, w, h = rect
         tw, th = max(1, self.px(w)), max(1, self.px(h))
+        mode = st.get("contentMode") or "scaleToFill"     # fileImage 的默认值
         ins = d.get("insets")
-        im = self._nine_patch(im, tw, th, ins) if ins else im.resize((tw, th), Image.LANCZOS)
-        canvas.alpha_composite(im, (self.px(x), self.px(y)))
+        ox = oy = 0
+        if ins and mode == "scaleToFill":
+            im = self._nine_patch(im, tw, th, ins)
+        elif mode == "scaleAspectFit":
+            s = min(tw / float(im.width), th / float(im.height))
+            nw, nh = max(1, int(round(im.width * s))), max(1, int(round(im.height * s)))
+            im = im.resize((nw, nh), Image.LANCZOS)
+            ox, oy = (tw - nw) // 2, (th - nh) // 2
+        elif mode == "scaleAspectFill":
+            s = max(tw / float(im.width), th / float(im.height))
+            nw, nh = max(1, int(round(im.width * s))), max(1, int(round(im.height * s)))
+            im = im.resize((nw, nh), Image.LANCZOS)
+            cx, cy = (nw - tw) // 2, (nh - th) // 2
+            im = im.crop((cx, cy, cx + tw, cy + th))
+        elif mode == "center":
+            # 原始像素尺寸居中；超出可视区就裁掉（真机按点算，这里按像素近似）
+            cx, cy = max(0, (im.width - tw) // 2), max(0, (im.height - th) // 2)
+            im = im.crop((cx, cy, cx + min(tw, im.width), cy + min(th, im.height)))
+            ox, oy = (tw - im.width) // 2, (th - im.height) // 2
+        else:
+            im = im.resize((tw, th), Image.LANCZOS)
+        canvas.alpha_composite(im, (self.px(x) + ox, self.px(y) + oy))
 
     def _nine_patch(self, im, tw, th, ins):
         """按 insets 做九宫格拉伸：四角不缩放，四边单向拉伸，中间双向拉伸。

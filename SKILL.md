@@ -168,6 +168,8 @@ python3 <skill目录>/scripts/preview_skin.py <皮肤目录> [输出目录]
 - 按下态整片空白（`fileImage` 只写了 `normalImage`——按下态**不会**回退，直接画空）
 - 九宫格保护区比目标还大，图糊成一坨
 - 前景图层跑到键外、深色皮肤下透出底色
+- 工具栏 / 候选栏的图标缩成一条丝（`scaleAspectFit` 的 `rect` 没收紧到图形包围盒，
+  见 `recipes.md` 的「皮肤图片」）
 
 转换现成皮肤时，把预览图和原皮肤的 `demo.png` **并排比一眼**再交付。
 
