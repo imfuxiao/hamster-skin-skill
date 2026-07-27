@@ -78,12 +78,13 @@ _palette:
 三条切片）。**iOS 26 起系统键盘自带圆角背景**，一张方角、铺满、带自己配色的背景图压在上面
 会明显违和——四角对不上、边缘出现色块。
 
-所以开工前用 `AskUserQuestion` 问一次，两个选项：
+所以开工前用 `AskUserQuestion` 问一次，三个选项：
 
 | 选择 | 做法 |
 | --- | --- |
-| **不要背景图**（对 iOS 26 更稳妥，建议作为推荐项放第一个） | 三个区域的 `backgroundStyle` 一律改成 `geometry`，颜色取「原背景图的实际像素色 + alpha `01`」（即 0.1%，肉眼等同透明），露出系统自带的圆角键盘背景 |
-| **要背景图** | 照常用 `fileImage` 铺满 |
+| **不要背景图**（对 iOS 26 最稳妥，建议作为推荐项放第一个） | 三个区域的 `backgroundStyle` 一律改成 `geometry`，颜色取「原背景图的实际像素色 + alpha `01`」（即 0.1%，肉眼等同透明），露出系统自带的圆角键盘背景 |
+| **过渡背景**（想保留插画又不想露硬边时选它） | 照常用 `fileImage` 铺满，但把背景图的**顶边与底边**做 alpha 渐变到全透明，见下面的「过渡背景怎么做」 |
+| **要背景图** | 照常用 `fileImage` 铺满，一个像素都不动 |
 
 ```yaml
 # 不要背景图：三个区域都这么写（颜色可从原背景图上取样，alpha 固定 01）
@@ -92,6 +93,25 @@ keyboardBg:
   normalColor:    "#DFEEEB01"      # alpha 0.1%
   highlightColor: "#DFEEEB01"
 ```
+
+##### 过渡背景怎么做
+
+用 `scripts/fade_background.py` 直接改背景拼合图的 alpha，**yaml 一个字都不用改**
+（还是原来那三个 `fileImage`）：
+
+```bash
+# 顶边渐隐的是最上面那个区域的切片，底边渐隐的是最下面那个区域的切片
+python3 <skill目录>/scripts/fade_background.py <皮肤>/light/resources bj --top k1:40 --bottom k3:32
+python3 <skill目录>/scripts/fade_background.py <皮肤>/dark/resources  bj --top k1:40 --bottom k3:32
+```
+
+- **只渐隐最外面那两条边**：顶边给预编辑区那条切片、底边给按键区那条切片，中间的候选栏切片
+  不动。三条都做上下渐变会在区域交界处透出两道横缝。
+- 渐隐长度按**图片像素**给，换算成点要乘「该切片高度 ÷ 它渲染成的点数」。
+  经验值：上下各 **14~17pt**——短了看不出过渡，长了插画会被吃掉大半。
+- 开了**内嵌输入**时预编辑区不渲染，此时最上面变成候选栏那条切片，顶边会重新变硬。
+  在意的话把顶边渐隐也复制一份给候选栏切片，代价是关掉内嵌输入时多一道缝。
+- 脚本会把原图备份成 `<图片名>.png.orig`，可以反复调参数重跑；**打包前记得删掉 `.orig`**。
 
 要点：
 
@@ -256,4 +276,5 @@ scripts/
   preview_skin.py   按元书布局算法渲成 png，用来肉眼检查几何（需 Pillow + PyYAML）
   package_skin.sh   打包成 .cskin（内置校验）
   baidu_extract.py  从百度皮肤提取：背景图 + 预合成前景 + physics 用图 + 布局摘要 json
+  fade_background.py 把背景拼合图的指定小图顶边 / 底边渐隐到透明（「过渡背景」用）
 ```
