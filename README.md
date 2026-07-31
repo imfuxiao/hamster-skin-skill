@@ -2,7 +2,7 @@
 
 用一句话描述，让 AI 帮你做一套元书输入法的键盘皮肤。
 
-这是一个 [Claude Code](https://claude.com/claude-code) Skill。装好之后，你只需要说
+Skill 安装好之后，你只需要说
 「帮我做一个莫兰迪色系的键盘皮肤」，它会产出一个可以直接装进 iPhone 的 `.cskin` 文件。
 
 仓库里同时包含两个**可以脱离 AI 单独使用**的命令行工具：皮肤校验器和打包器。
@@ -44,7 +44,9 @@
 
 ## 安装
 
-Skill 就是一个包含 `SKILL.md` 的目录，放到 Claude Code 的 skills 目录下即可。
+Skill 就是一个包含 `SKILL.md` 的目录，放到 Agent 下的 skills 目录下即可。
+
+已 Claude Code 为例：
 
 ### 方式一：个人级（推荐，所有项目都能用）
 
@@ -418,6 +420,5 @@ python3 scripts/validate_skin.py <某个已知正常的皮肤>
 
 ## 相关链接
 
-- [元书输入法](https://github.com/imfuxiao/Hamster3)
 - [元书使用文档](https://ihsiao.com/apps/hamster/v3/docs/)
 - [Claude Code Skills 文档](https://code.claude.com/docs/en/skills)
